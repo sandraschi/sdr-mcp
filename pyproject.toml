@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdr-mcp"
+version = "0.1.0"
+description = "SDR (Software Defined Radio) MCP Server"
+authors = [{name = "Sandra Schi-Avanzini"}]
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "fastmcp>=3.2.0,<4",
+    "httpx>=0.27.0,<1.0.0",
+    "pyrtlsdr[lib]>=0.3.0,<1.0.0",
+    "numpy>=1.21.0,<2.0.0",
+    "scipy>=1.7.0,<2.0.0",
+    "websockets>=15.0.1",
+    "pydantic>=2.0.0,<3.0.0",
+    "click>=8.0.0,<9.0.0",
+    "rich>=13.0.0,<14.0.0",
+    "prefab-ui>=0.14.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    
+    "ruff>=0.15.2","pytest>=7.0.0,<8.0.0",
+    "pytest-asyncio>=0.20.0,<1.0.0",
+    "pytest-mock>=3.10.0,<4.0.0",
+    "black>=23.0.0,<24.0.0",
+    "isort>=5.12.0,<6.0.0",
+    "mypy>=1.0.0,<2.0.0",
+]
+
+[project.scripts]
+sdr-mcp = "sdr_mcp.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "S", "UP", "RUF"]
+ignore = ["S101", "B008"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
