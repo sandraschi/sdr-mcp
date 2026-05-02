@@ -1,4 +1,4 @@
-import { Tooltip } from "@radix-ui/react-tooltip";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { useEffect, useState } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
