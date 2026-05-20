@@ -1,5 +1,12 @@
 # SDR MCP Server
 
+<p align="center">
+  <a href="https://github.com/casey/just"><img src="https://img.shields.io/badge/just-ready_to_go-7c5cfc?style=flat-square&logo=just&logoColor=white" alt="Just"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.13+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
+  <a href="https://github.com/PrefectHQ/fastmcp"><img src="https://img.shields.io/badge/FastMCP-3.2-7c5cfc?style=flat-square" alt="FastMCP"></a>
+</p>
+
 **Conversational AI control for Software Defined Radio via the Model Context Protocol.**
 
 Control RTL-SDR hardware through natural dialogue — query spectrum, tune frequencies,
@@ -10,26 +17,27 @@ Claude Desktop, any MCP client, or the included web dashboard.
 
 ## Quick Start
 
-```bash
-# Install
-pip install sdr-mcp
-
-# Check hardware
-sdr-mcp check
-
-# Start server (STDIO mode for Claude Desktop)
-sdr-mcp serve
+```powershell
+git clone https://github.com/sandraschi/sdr-mcp
+cd sdr-mcp
+just
 ```
 
-For the web dashboard:
+This opens an interactive dashboard showing all available commands. Run `just bootstrap` to install dependencies, then `just serve` or `just dev` to start.
 
-```bash
+### Manual Setup
+
+If you don't have `just` installed:
+# Install
+pip install sdr-mcp
+# Check hardware
+sdr-mcp check
+# Start server (STDIO mode for Claude Desktop)
+sdr-mcp serve
+For the web dashboard:
 cd web_sota
 npm install
 npm run dev
-```
-
----
 
 ## Documentation
 

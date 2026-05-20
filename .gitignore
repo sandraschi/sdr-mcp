@@ -160,3 +160,4 @@ capture_*.dat
 # Build artifacts
 *.egg-info/
 *.bak
+_dashboard/
