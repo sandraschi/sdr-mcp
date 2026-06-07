@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { type SpectrumData, useSDRWebSocket } from "@/common/use-sdr-ws";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,8 +60,15 @@ function drawWaterfall(canvas: HTMLCanvasElement, data: SpectrumData) {
 
 export function Waterfall() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { connectionState, connect, disconnect, onSpectrum } =
-    useSDRWebSocket();
+  const {
+    connectionState,
+    connect,
+    disconnect,
+    onSpectrum,
+    audioEnabled,
+    audioActive,
+    toggleAudio,
+  } = useSDRWebSocket();
   const animRef = useRef<number>(0);
 
   const draw = useCallback((data: SpectrumData) => {
@@ -85,7 +92,9 @@ export function Waterfall() {
           <h2 className="text-2xl font-bold tracking-tight text-white">
             Waterfall Display
           </h2>
-          <p className="text-slate-400">Time-frequency signal visualization</p>
+          <p className="text-slate-400">
+            Time-frequency view with FM audio from the same WebSocket stream
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span
@@ -100,6 +109,20 @@ export function Waterfall() {
             }`}
           />
           <span className="text-xs text-slate-400">{connectionState}</span>
+          {connectionState === "connected" ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toggleAudio(!audioEnabled)}
+              className="border-slate-700 text-slate-300"
+            >
+              {audioEnabled
+                ? audioActive
+                  ? "Audio on"
+                  : "Audio idle"
+                : "Muted"}
+            </Button>
+          ) : null}
           {connectionState !== "connected" ? (
             <Button
               size="sm"

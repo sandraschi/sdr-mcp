@@ -55,16 +55,20 @@ LW/MW/HF bands (0.5-24 MHz) with reduced but usable sensitivity.
 ## Where to Buy
 
 - **Official store:** rtl-sdr.com (worldwide shipping, ~$35)
-- **Amazon:** Search "RTL-SDR Blog v4" (various sellers)
+- **Amazon DE:** Search “RTL-SDR Blog v4” (various sellers)
 - **AliExpress:** Official RTL-SDR Blog store
+
+**Budget alternative (standard cheap RX):** [NooElec NESDR SMArt](https://www.amazon.de/-/en/NooElec-NESDR-SMArt-Bundle-R820T2-Based-black/dp/B01GDN1T4S) —
+RTL2832U + R820T2, 0.5 ppm TCXO, SMA, aluminum case. Fully compatible with sdr-mcp native RTL path.
+See tier breakdown in [HACKRF.md — Hardware Buying Guide](HACKRF.md#hardware-buying-guide-for-sdr-mcp).
 
 ## Alternatives
 
 | Model | Price | Notes |
 |-------|-------|-------|
+| **NooElec NESDR SMArt** | ~€30–45 | **Default budget RX** — [Amazon DE B01GDN1T4S](https://www.amazon.de/-/en/NooElec-NESDR-SMArt-Bundle-R820T2-Based-black/dp/B01GDN1T4S) |
 | RTL-SDR Blog v3 | ~$25 | Previous gen, 1 ppm TCXO, no hardware image rejection |
-| Nooelec NESDR SMArt | ~$30 | Good build, SMA, bias tee |
 | Nooelec NESDR Smartee | ~$45 | v4 equivalent, 0.5 ppm |
 | Airspy HF+ Discovery | ~$170 | Much better, but 5x the price |
-| HackRF One | ~$300 | Transmit capable, wider bandwidth |
+| HackRF One / R9 + PortaPack | ~€250–350+ | TX capable — [buying guide](HACKRF.md#hardware-buying-guide-for-sdr-mcp) |
 | LimeSDR Mini | ~$200 | Full duplex, 10 MHz bandwidth |

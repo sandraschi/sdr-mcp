@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] — 2026-06-08
+
+### Added
+- **Dashboard hero** — plain-language SDR intro for beginners
+- **Help page** — horizontal tabs (hardware, audio, MCP, legal, repo docs)
+- **GitHub metadata** — `.github/REPOSITORY.md`, README badges & topics
+- **FM audio on WebSocket** — Spectrum/Waterfall pages play demodulated audio (Web Audio API)
+- **GNU Radio UDP audio** — sidecar sends PCM to host; `sounddevice` playback + browser relay
+- **`fm_demod.py`**, **`audio_stream.py`**, `set_audio` WebSocket command
+
+### Changed
+- GNU Radio `receiver.py` uses UDP sink instead of `null_sink` (configurable via `SDR_AUDIO_MODE`)
+
+## [0.4.1] — 2026-06-08
+
+### Added
+- **Mock SDR mode** — synthetic IQ for FFT/waterfall/WebSocket without RTL-SDR
+- **`sdr_device(operation='mock_mode')`** — enable, disable, or query mock capture
+- **`SDR_MCP_MOCK` env** — `auto` (default), `enable`, `disable`
+- **Docs:** [MOCK_SDR.md](docs/MOCK_SDR.md) (PyPI landscape), [OSCILLOSCOPE_MCP.md](docs/OSCILLOSCOPE_MCP.md) (scope MCP feasibility)
+- **Hardware buying guide** in [HACKRF.md](docs/HACKRF.md) — NESDR SMArt, RTL-SDR Blog v4, HackRF R9/PortaPack tiers
+
+## [0.4.0] — 2026-06-08
+
+### Added
+- **`tools/` package** — portmanteau MCP tools separated from `server.py`
+- **FastMCP 3.4.2** — dependency bump (`fastmcp>=3.4.2,<4`)
+- **`sdr_agentic_assist`** — SEP-1577 sampling workflow planner
+- **`sdr_sampling_hint`** — topic → tool/frequency suggestions via `ctx.sample`
+- **Startup health** — `sdr_device(operation='health')` ( `@mcp.probe` not in FastMCP 3.4.2 yet)
+
+### Changed
+- `server.py` is registration-only; handlers stay in `handlers/`
+
+## [0.3.0] — 2026-06-08
+
+### Added
+- **Portmanteau MCP tools** — 5 tools replace 17 individual tools
+- **Web API bridge** — REST on :10892 for chat, dashboard, status pages
+- **Live dashboard/status** — polls hardware + GNU Radio sidecar state
+- **Chat UI** — natural language → MCP tool dispatch
+- **AM/USB/LSB demod** in GNU Radio sidecar
+- **HackRF source** via gr-osmosdr (Docker + USB) — see [HACKRF.md](docs/HACKRF.md) buying guide
+- Unified `docker/gnuradio/receiver.py`
+
+### Changed
+- Handlers extracted to `src/sdr_mcp/handlers/`
+- `just dev` starts HTTP MCP + Web API + Vite
+- Vite proxies `/api` → :10892
+
+## [0.2.2] — 2026-06-08
+
+### Added
+- **GNU Radio sidecar** — Dockerized FM demod service (`docker/gnuradio/`)
+- **`sdr_gnuradio` MCP tool** — health, status, start, stop via HTTP
+- **`just` recipes** — bootstrap, serve, serve-http, dev, rtl-tcp, gnuradio-up/down
+- **`scripts/start-rtl-tcp.ps1`** — host-side rtl_tcp launcher
+- **Docs** — `GNURADIO.md`, `HACKRF.md` (TX licensing explained)
+
+### Changed
+- Version aligned to 0.2.2 across pyproject, CLI, and `__init__.py`
+- Removed stale `.bak` files from `src/sdr_mcp/`
+- Ruff auto-fix applied (imports, formatting)
+
 ## [0.2.1] — 2026-05-01
 
 ### Fixed

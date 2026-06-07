@@ -83,6 +83,9 @@ export function Spectrum() {
     disconnect,
     sendCommand,
     onSpectrum,
+    audioEnabled,
+    audioActive,
+    toggleAudio,
   } = useSDRWebSocket();
   const [frequency, setFrequency] = useState("100.0");
   const [gain, setGain] = useState("auto");
@@ -110,7 +113,7 @@ export function Spectrum() {
 
   const handleSetFrequency = () => {
     const freq = parseFloat(frequency);
-    if (!isNaN(freq)) {
+    if (!Number.isNaN(freq)) {
       sendCommand("set_frequency", { frequency: freq * 1e6 });
     }
   };
@@ -126,7 +129,10 @@ export function Spectrum() {
           <h2 className="text-2xl font-bold tracking-tight text-white">
             Spectrum Analyzer
           </h2>
-          <p className="text-slate-400">Real-time FFT spectrum display</p>
+          <p className="text-slate-400">
+            Real-time FFT spectrum with FM audio (tune to a station, e.g. 100.0
+            MHz)
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span
@@ -141,6 +147,20 @@ export function Spectrum() {
             }`}
           />
           <span className="text-xs text-slate-400">{connectionState}</span>
+          {connectionState === "connected" ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toggleAudio(!audioEnabled)}
+              className="border-slate-700 text-slate-300"
+            >
+              {audioEnabled
+                ? audioActive
+                  ? "Audio on"
+                  : "Audio idle"
+                : "Muted"}
+            </Button>
+          ) : null}
           {connectionState !== "connected" ? (
             <Button
               size="sm"

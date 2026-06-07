@@ -1,0 +1,18 @@
+services:
+  gnuradio-demod:
+    build:
+      context: ./docker/gnuradio
+    container_name: sdr-mcp-gnuradio
+    ports:
+      - "10900:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      RTL_TCP_HOST: host.docker.internal
+      RTL_TCP_PORT: "1234"
+      DEMOD_HOST: 0.0.0.0
+      DEMOD_PORT: "8000"
+      SDR_AUDIO_MODE: udp
+      SDR_AUDIO_HOST: host.docker.internal
+      SDR_AUDIO_PORT: "7355"
+    restart: unless-stopped

@@ -36,7 +36,7 @@ class SDRProcessor:
                 return np.array([]), np.array([])
 
             # Take the most recent samples
-            iq_data = samples[-self.fft_size:]
+            iq_data = samples[-self.fft_size :]
 
             # Apply window function
             windowed = iq_data * self.window
@@ -52,7 +52,7 @@ class SDRProcessor:
 
             # Generate frequency axis
             freq_step = self.sample_rate / self.fft_size
-            frequencies = np.arange(-self.fft_size//2, self.fft_size//2) * freq_step
+            frequencies = np.arange(-self.fft_size // 2, self.fft_size // 2) * freq_step
 
             return frequencies, power_spectrum
 
@@ -77,7 +77,7 @@ class SDRProcessor:
         if self.waterfall_history:
             latest = self.waterfall_history[-1]
             freq_step = self.sample_rate / self.fft_size
-            frequencies = np.arange(-self.fft_size//2, self.fft_size//2) * freq_step
+            frequencies = np.arange(-self.fft_size // 2, self.fft_size // 2) * freq_step
             return frequencies.tolist(), latest.tolist()
         return [], []
 
@@ -94,18 +94,13 @@ class SDRProcessor:
             self.add_waterfall_line(power_spectrum)
 
             return {
-                'frequencies': frequencies.tolist(),
-                'spectrum': power_spectrum.tolist(),
-                'waterfall': self.get_waterfall_data(),
-                'timestamp': time.time()
+                "frequencies": frequencies.tolist(),
+                "spectrum": power_spectrum.tolist(),
+                "waterfall": self.get_waterfall_data(),
+                "timestamp": time.time(),
             }
 
-        return {
-            'frequencies': [],
-            'spectrum': [],
-            'waterfall': self.get_waterfall_data(),
-            'timestamp': time.time()
-        }
+        return {"frequencies": [], "spectrum": [], "waterfall": self.get_waterfall_data(), "timestamp": time.time()}
 
     def clear_waterfall(self):
         """Clear the waterfall history."""

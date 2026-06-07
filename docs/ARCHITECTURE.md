@@ -93,7 +93,11 @@ via CLI flags (`--http`) or the `MCP_TRANSPORT` environment variable.
    `conversation`, `next_steps`, and educational content for AI consumption.
 
 4. **Background tasks** — long-running operations (scan, WebSocket server) use
-   `@mcp.tool(task=True)` (FastMCP 3.2 feature) to avoid blocking the server.
+   `asyncio.create_task()` inside tool handlers to avoid blocking the server.
 
-5. **Browser-side CORS** — radio-browser.info and SigID Wiki are queried
+5. **GNU Radio sidecar** — FM demod runs in a Docker container, connecting to
+   rtl_tcp on the Windows host. MCP tool `sdr_gnuradio` controls it via HTTP.
+   See [GNURADIO.md](GNURADIO.md).
+
+6. **Browser-side CORS** — radio-browser.info and SigID Wiki are queried
    directly from the browser, no backend proxy needed.

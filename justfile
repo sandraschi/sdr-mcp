@@ -6,6 +6,44 @@
 default:
     @just --list
 
+# ── Setup & Run ───────────────────────────────────────────────────────────────
+
+# Install Python and web dependencies
+bootstrap:
+    Set-Location '{{justfile_directory()}}'
+    uv sync
+    Set-Location '{{justfile_directory()}}\web_sota'
+    npm install
+
+# Start MCP server (STDIO)
+serve:
+    Set-Location '{{justfile_directory()}}'
+    uv run sdr-mcp serve
+
+# Start MCP server in HTTP mode
+serve-http:
+    Set-Location '{{justfile_directory()}}'
+    uv run sdr-mcp serve --http
+
+# Start backend + web dashboard
+dev:
+    Set-Location '{{justfile_directory()}}'
+    pwsh -NoProfile -File .\start.ps1
+
+# Start rtl_tcp on the Windows host (separate terminal)
+rtl-tcp:
+    pwsh -NoProfile -File '{{justfile_directory()}}\scripts\start-rtl-tcp.ps1'
+
+# Build and start GNU Radio demod sidecar
+gnuradio-up:
+    Set-Location '{{justfile_directory()}}'
+    docker compose up -d --build gnuradio-demod
+
+# Stop GNU Radio demod sidecar
+gnuradio-down:
+    Set-Location '{{justfile_directory()}}'
+    docker compose down
+
 # ── Quality ───────────────────────────────────────────────────────────────────
 
 # Execute Ruff SOTA v13.1 linting
@@ -34,4 +72,10 @@ check-sec:
 audit-deps:
     Set-Location '{{justfile_directory()}}'
     uv run safety check
+
+# ── MCPB ──────────────────────────────────────────────────────────────────────
+
+# Build Claude Desktop MCPB bundle (Windows staging script)
+mcpb-pack:
+    pwsh -NoProfile -File '{{justfile_directory()}}\scripts\build-mcpb.ps1'
 

@@ -1,10 +1,9 @@
+import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Archive,
   Bot,
-  Box,
   Brain,
-  Github,
   LayoutGrid,
   MonitorPlay,
   Scan,
@@ -14,7 +13,7 @@ export interface AppEntry {
   id: string;
   label: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
   url: string; // Absolute URL for cross-app navigation
   port: number;
   tags: string[];

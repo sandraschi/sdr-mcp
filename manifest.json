@@ -1,0 +1,54 @@
+{
+  "manifest_version": "0.2",
+  "name": "sdr-mcp",
+  "version": "0.4.2",
+  "description": "RTL-SDR MCP server — spectrum, waterfall, FM audio, station lookup, GNU Radio sidecar.",
+  "long_description": "FastMCP 3.4 MCP server for Software Defined Radio on Windows. Portmanteau tools cover device control, live spectrum/waterfall, station databases, online radio-browser lookup, and optional GNU Radio demod. Mock mode works without USB hardware.",
+  "author": {
+    "name": "Sandra Schi-Avanzini",
+    "email": "team@sandraschi.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/sdr-mcp"
+  },
+  "homepage": "https://github.com/sandraschi/sdr-mcp",
+  "license": "MIT",
+  "keywords": ["mcp", "sdr", "rtl-sdr", "radio", "spectrum", "fm", "gnuradio", "windows"],
+  "server": {
+    "type": "python",
+    "entry_point": "src/sdr_mcp/cli.py",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "sdr_mcp.cli", "serve"],
+      "env": {
+        "PYTHONPATH": "${PWD}/src",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONIOENCODING": "utf-8:replace",
+        "FASTMCP_NO_BANNER": "1"
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": ["win32"]
+  },
+  "tools_generated": true,
+  "prompts_generated": true,
+  "prompts": [
+    {
+      "name": "system",
+      "description": "System prompt — SDR tools, mock mode, hardware rules",
+      "text": "prompts/system.md"
+    },
+    {
+      "name": "user",
+      "description": "User guide — tuning, spectrum, stations, troubleshooting",
+      "text": "prompts/user.md"
+    },
+    {
+      "name": "examples",
+      "description": "Structured tool-call examples for portmanteau tools",
+      "text": "prompts/examples.json"
+    }
+  ]
+}

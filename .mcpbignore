@@ -1,0 +1,69 @@
+# MCPB pack exclusions — fleet standard (see mcp-central-docs/standards/MCPB_PACKAGING_STANDARDS.md)
+
+# Python environment and caches
+.venv/
+.venv*/
+**/__pycache__/
+*.pyc
+*.pyo
+*.py[cod]
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.ty_cache/
+*.egg-info/
+
+# Frontend / desktop (not part of Claude Desktop MCP bundle)
+web_sota/
+native/
+node_modules/
+
+# Dev/build data
+data/
+*.db
+*.db-wal
+*.db-shm
+logs/
+*.log
+mcpb-build/
+build/
+dist/
+target/
+*.exe
+*.msi
+*.spec
+docker-compose.yml
+Dockerfile
+gnuradio/
+
+# Fleet/discovery metadata (repo only)
+glama.json
+llms.txt
+llms-full.txt
+uv.lock
+pyproject.toml
+justfile
+mcpb.json
+
+# VCS, CI, editor
+.git/
+.github/
+.gitignore
+.cursor/
+.windsurf/
+.vscode/
+.pre-commit-config.yaml
+
+# Tests and scripts
+tests/
+scripts/
+docs/
+e2e/
+playwright-report/
+test-results/
+
+# Docs (README + CHANGELOG allowed at pack root)
+INSTALL.md
+
+# Build artifacts
+*.mcpb

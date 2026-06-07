@@ -31,6 +31,7 @@ class Band(Enum):
 @dataclass
 class ProgramSchedule:
     """Program schedule entry"""
+
     name: str
     description: str
     start_time: time
@@ -43,6 +44,7 @@ class ProgramSchedule:
 @dataclass
 class RadioStation:
     """Complete radio station information"""
+
     name: str
     callsign: str
     frequency: float  # in Hz
@@ -107,12 +109,42 @@ class FrequencyDatabase:
                 "description": "BBC's flagship speech radio station featuring news, drama, comedy, and cultural programming",
                 "website": "https://www.bbc.co.uk/radio4",
                 "programs": [
-                    ProgramSchedule("Today", "News and current affairs", time(6, 0), time(9, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("The World at One", "Lunchtime news", time(13, 0), time(13, 45), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("PM", "Evening news and analysis", time(17, 0), time(18, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("The Archers", "Long-running radio soap opera", time(19, 15), time(19, 45), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Book of the Week", "Literary discussion", time(9, 45), time(10, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                ]
+                    ProgramSchedule(
+                        "Today",
+                        "News and current affairs",
+                        time(6, 0),
+                        time(9, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "The World at One",
+                        "Lunchtime news",
+                        time(13, 0),
+                        time(13, 45),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "PM",
+                        "Evening news and analysis",
+                        time(17, 0),
+                        time(18, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "The Archers",
+                        "Long-running radio soap opera",
+                        time(19, 15),
+                        time(19, 45),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Book of the Week",
+                        "Literary discussion",
+                        time(9, 45),
+                        time(10, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                ],
             },
             {
                 "name": "ORF Radio Österreich 1",
@@ -126,11 +158,35 @@ class FrequencyDatabase:
                 "description": "ORF's flagship cultural and information station with classical music and comprehensive news",
                 "website": "https://orf.at",
                 "programs": [
-                    ProgramSchedule("Ö1 Morgenjournal", "Morning news", time(5, 0), time(9, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Ö1 Mittagsjournal", "Lunch news", time(12, 0), time(13, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Ö1 Abendjournal", "Evening news", time(18, 30), time(19, 30), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Klassik-Treffpunkt", "Classical music program", time(19, 30), time(21, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                ]
+                    ProgramSchedule(
+                        "Ö1 Morgenjournal",
+                        "Morning news",
+                        time(5, 0),
+                        time(9, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Ö1 Mittagsjournal",
+                        "Lunch news",
+                        time(12, 0),
+                        time(13, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Ö1 Abendjournal",
+                        "Evening news",
+                        time(18, 30),
+                        time(19, 30),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Klassik-Treffpunkt",
+                        "Classical music program",
+                        time(19, 30),
+                        time(21, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                ],
             },
             {
                 "name": "France Inter",
@@ -144,12 +200,42 @@ class FrequencyDatabase:
                 "description": "France's main public radio station featuring news, culture, music, and intellectual programming",
                 "website": "https://www.franceinter.fr",
                 "programs": [
-                    ProgramSchedule("Le Journal de 7h", "Morning news", time(7, 0), time(9, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Le Journal de 8h", "News update", time(8, 0), time(8, 30), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Le Journal de 12h", "Midday news", time(12, 0), time(12, 30), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Le Journal de 13h", "Afternoon news", time(13, 0), time(13, 30), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("Le Journal de 18h", "Evening news", time(18, 0), time(18, 30), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                ]
+                    ProgramSchedule(
+                        "Le Journal de 7h",
+                        "Morning news",
+                        time(7, 0),
+                        time(9, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Le Journal de 8h",
+                        "News update",
+                        time(8, 0),
+                        time(8, 30),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Le Journal de 12h",
+                        "Midday news",
+                        time(12, 0),
+                        time(12, 30),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Le Journal de 13h",
+                        "Afternoon news",
+                        time(13, 0),
+                        time(13, 30),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "Le Journal de 18h",
+                        "Evening news",
+                        time(18, 0),
+                        time(18, 30),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                ],
             },
             {
                 "name": "RTL Radio",
@@ -163,10 +249,22 @@ class FrequencyDatabase:
                 "description": "Popular commercial radio station broadcasting entertainment, music, and information across Europe",
                 "website": "https://www.rtl.lu",
                 "programs": [
-                    ProgramSchedule("RTL Matin", "Morning show", time(6, 0), time(9, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                    ProgramSchedule("RTL Soir", "Evening entertainment", time(16, 0), time(19, 0), ["monday", "tuesday", "wednesday", "thursday", "friday"]),
-                ]
-            }
+                    ProgramSchedule(
+                        "RTL Matin",
+                        "Morning show",
+                        time(6, 0),
+                        time(9, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                    ProgramSchedule(
+                        "RTL Soir",
+                        "Evening entertainment",
+                        time(16, 0),
+                        time(19, 0),
+                        ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                    ),
+                ],
+            },
         ]
 
         for station_data in stations_data:
@@ -182,7 +280,7 @@ class FrequencyDatabase:
                 language=station_data["language"],
                 website=station_data.get("website"),
                 description=station_data["description"],
-                programs=station_data["programs"]
+                programs=station_data["programs"],
             )
             self.stations[station.callsign] = station
 
@@ -198,7 +296,7 @@ class FrequencyDatabase:
                 "station_type": StationType.PUBLIC,
                 "power": 50,
                 "language": "English",
-                "description": "BBC's sports and live events station"
+                "description": "BBC's sports and live events station",
             },
             {
                 "name": "France Info",
@@ -209,7 +307,7 @@ class FrequencyDatabase:
                 "station_type": StationType.PUBLIC,
                 "power": 100,
                 "language": "French",
-                "description": "France's 24/7 news and information station"
+                "description": "France's 24/7 news and information station",
             },
             {
                 "name": "Deutsche Welle",
@@ -220,8 +318,8 @@ class FrequencyDatabase:
                 "station_type": StationType.INTERNATIONAL,
                 "power": 150,
                 "language": "German",
-                "description": "Germany's international broadcaster"
-            }
+                "description": "Germany's international broadcaster",
+            },
         ]
 
         for station_data in mw_stations:
@@ -236,7 +334,7 @@ class FrequencyDatabase:
                 power=station_data["power"],
                 language=station_data["language"],
                 website=station_data.get("website"),
-                description=station_data["description"]
+                description=station_data["description"],
             )
             self.stations[station.callsign] = station
 
@@ -252,7 +350,7 @@ class FrequencyDatabase:
                 "station_type": StationType.INTERNATIONAL,
                 "power": 250,
                 "language": "English",
-                "description": "BBC's international news and information service"
+                "description": "BBC's international news and information service",
             },
             {
                 "name": "Voice of America",
@@ -263,7 +361,7 @@ class FrequencyDatabase:
                 "station_type": StationType.INTERNATIONAL,
                 "power": 250,
                 "language": "English",
-                "description": "US international broadcasting service"
+                "description": "US international broadcasting service",
             },
             {
                 "name": "Radio France Internationale",
@@ -274,8 +372,8 @@ class FrequencyDatabase:
                 "station_type": StationType.INTERNATIONAL,
                 "power": 500,
                 "language": "French",
-                "description": "France's international radio service"
-            }
+                "description": "France's international radio service",
+            },
         ]
 
         for station_data in sw_stations:
@@ -290,7 +388,7 @@ class FrequencyDatabase:
                 power=station_data["power"],
                 language=station_data["language"],
                 website=station_data.get("website"),
-                description=station_data["description"]
+                description=station_data["description"],
             )
             self.stations[station.callsign] = station
 
@@ -306,7 +404,7 @@ class FrequencyDatabase:
                 "station_type": StationType.MILITARY,
                 "power": 10,
                 "language": "English",
-                "description": "British Forces Broadcasting Service"
+                "description": "British Forces Broadcasting Service",
             }
         ]
 
@@ -322,12 +420,11 @@ class FrequencyDatabase:
                 power=station_data["power"],
                 language=station_data["language"],
                 website=station_data.get("website"),
-                description=station_data["description"]
+                description=station_data["description"],
             )
             self.stations[station.callsign] = station
 
-    def search_stations(self, query: str, band: Band | None = None,
-                       country: str | None = None) -> list[RadioStation]:
+    def search_stations(self, query: str, band: Band | None = None, country: str | None = None) -> list[RadioStation]:
         """Search stations by name, callsign, or description"""
         query_lower = query.lower()
         results = []
@@ -338,18 +435,19 @@ class FrequencyDatabase:
             if country and station.country.lower() != country.lower():
                 continue
 
-            if (query_lower in station.name.lower() or
-                query_lower in station.callsign.lower() or
-                query_lower in station.description.lower() or
-                query_lower in station.country.lower()):
+            if (
+                query_lower in station.name.lower()
+                or query_lower in station.callsign.lower()
+                or query_lower in station.description.lower()
+                or query_lower in station.country.lower()
+            ):
                 results.append(station)
 
         return results
 
     def get_stations_by_frequency_range(self, min_freq: float, max_freq: float) -> list[RadioStation]:
         """Get stations within frequency range (in Hz)"""
-        return [s for s in self.stations.values()
-                if min_freq <= s.frequency <= max_freq]
+        return [s for s in self.stations.values() if min_freq <= s.frequency <= max_freq]
 
     def get_stations_by_band(self, band: Band) -> list[RadioStation]:
         """Get all stations on a specific band"""
@@ -357,8 +455,7 @@ class FrequencyDatabase:
 
     def get_stations_by_country(self, country: str) -> list[RadioStation]:
         """Get all stations from a specific country"""
-        return [s for s in self.stations.values()
-                if s.country.lower() == country.lower()]
+        return [s for s in self.stations.values() if s.country.lower() == country.lower()]
 
     def get_current_program(self, station_callsign: str) -> ProgramSchedule | None:
         """Get the currently playing program for a station"""
@@ -404,6 +501,7 @@ class FrequencyDatabase:
 
 # Global frequency database instance
 _frequency_db = None
+
 
 def get_frequency_database() -> FrequencyDatabase:
     """Get or create the global frequency database instance"""

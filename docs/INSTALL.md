@@ -35,21 +35,48 @@ pip install sdr-mcp
 
 ## 2. Driver Setup (Windows)
 
-RTL-SDR dongles ship with DVB-T drivers. These must be replaced with WinUSB
-for SDR software to access the device.
+RTL-SDR dongles are **DVB-T TV tuner sticks**. Windows often installs a **TV/DVB driver**
+so the stick can receive terrestrial TV. SDR software needs **raw IQ samples**, not a TV stream —
+so you replace that **USB driver binding**, not the dongle and not sdr-mcp.
+
+| What | Replace? |
+|------|----------|
+| USB dongle hardware | No |
+| sdr-mcp / Python packages | No |
+| Windows USB driver on the stick | **Yes** — DVB/TV driver → **WinUSB** |
+
+After WinUSB, the stick is an SDR receiver for `pyrtlsdr` / librtlsdr. It will **not** work as a
+normal DVB-T TV tuner under that driver. Roll back via Device Manager if you need TV mode again.
 
 ### Zadig Driver Installer
 
 1. Download [Zadig](https://zadig.akeo.ie/)
 2. Plug in your RTL-SDR dongle
 3. Open Zadig: **Options → List All Devices**
-4. Select your device from the dropdown (usually "Bulk-In, Interface (Interface 0)")
-5. Select **WinUSB** as the target driver
+4. Select your device from the dropdown (usually **Bulk-In, Interface (Interface 0)**)
+5. Select **WinUSB** as the target driver (not the original DVB driver)
 6. Click **Replace Driver**
 7. Verify: `sdr-mcp check` should detect your device
 
 > **Tip:** Keep the original driver handy. You can revert via
 > **Device Manager → Right-click device → Properties → Driver → Roll Back Driver**.
+
+### No dongle yet — mock mode
+
+Mock mode uses **synthetic IQ in software** (NumPy). No USB stick and **no driver** required.
+
+| Setting | Env `SDR_MCP_MOCK` | Behavior |
+|---------|-------------------|----------|
+| **auto** (default) | unset or `auto` | Mock when no RTL-SDR is detected |
+| **force mock** | `enable` | Always synthetic device `MOCK-0001` |
+| **hardware only** | `disable` | No mock; spectrum needs a dongle + WinUSB |
+
+```powershell
+$env:SDR_MCP_MOCK = "enable"
+uv run sdr-mcp serve --http
+```
+
+Or at runtime: `sdr_device(operation='mock_mode', mock_enabled=True)`. See [MOCK_SDR.md](MOCK_SDR.md).
 
 ---
 

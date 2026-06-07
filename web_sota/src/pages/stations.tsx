@@ -345,7 +345,7 @@ export function Stations() {
 
   const openFrequency = () => {
     const freq = parseFloat(manualFreq);
-    if (!isNaN(freq)) {
+    if (!Number.isNaN(freq)) {
       if (freq < 30) {
         window.open(`http://websdr.org/?freq=${freq * 1000}`, "_blank");
       } else {
@@ -550,9 +550,9 @@ export function Stations() {
                   </p>
                   <ScrollArea className="h-[340px]">
                     <div className="space-y-2">
-                      {onlineResults.map((station, i) => (
+                      {onlineResults.map((station) => (
                         <div
-                          key={i}
+                          key={`${station.url}-${station.name}`}
                           className="flex items-center justify-between p-2 rounded bg-slate-900/30 border border-slate-800"
                         >
                           <div className="flex-1 min-w-0">
@@ -734,7 +734,7 @@ export function Stations() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-slate-400">Quick Presets</label>
+              <p className="text-xs text-slate-400">Quick Presets</p>
               <div className="grid grid-cols-2 gap-2">
                 {PRESET_STATIONS.slice(0, 8).map((s) => (
                   <Button
@@ -757,9 +757,9 @@ export function Stations() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400">
                 Favorites ({favorites.length})
-              </label>
+              </p>
               <div className="space-y-1">
                 {favorites.length === 0 && (
                   <p className="text-xs text-slate-600">

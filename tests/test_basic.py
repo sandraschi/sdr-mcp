@@ -11,31 +11,31 @@ from sdr_mcp.capture import SDRCapture
 from sdr_mcp.frequency_db import Band, StationType, get_frequency_database
 from sdr_mcp.processor import SDRProcessor
 
-
 # ── Capture Tests ─────────────────────────────────────────────────────────
+
 
 class TestSDRCapture:
     def test_device_detection_no_hardware(self):
         """RtlSdr is imported lazily, so we test by patching the method body."""
         capture = SDRCapture()
-        with patch.object(capture, 'initialize', return_value=False):
-            with patch.object(capture, 'read_samples', return_value=None):
+        with patch.object(capture, "initialize", return_value=False):
+            with patch.object(capture, "read_samples", return_value=None):
                 assert SDRCapture.is_available() is False
                 assert SDRCapture.list_devices() == []
 
     def test_capture_initialization_mock(self):
         capture = SDRCapture()
-        with patch.object(capture, 'initialize', return_value=True):
+        with patch.object(capture, "initialize", return_value=True):
             assert capture.device_index == 0
             assert capture.sample_rate == 2.048e6
             assert capture.center_freq == 227e6
-            assert capture.gain == 'auto'
+            assert capture.gain == "auto"
 
     def test_get_info(self):
         capture = SDRCapture()
         info = capture.get_info()
-        assert info['device_index'] == 0
-        assert info['available'] is False
+        assert info["device_index"] == 0
+        assert info["available"] is False
 
     @pytest.mark.asyncio
     async def test_initialize_no_rtlsdr(self):
@@ -65,6 +65,7 @@ class TestSDRCapture:
 
 
 # ── Processor Tests ──────────────────────────────────────────────────────
+
 
 class TestSDRProcessor:
     def test_processor_creation(self):
@@ -117,11 +118,11 @@ class TestSDRProcessor:
         processor = SDRProcessor()
         samples = np.random.randn(4096) + 1j * np.random.randn(4096)
         result = processor.process_samples(samples)
-        assert 'frequencies' in result
-        assert 'spectrum' in result
-        assert 'waterfall' in result
-        assert 'timestamp' in result
-        assert len(result['spectrum']) > 0
+        assert "frequencies" in result
+        assert "spectrum" in result
+        assert "waterfall" in result
+        assert "timestamp" in result
+        assert len(result["spectrum"]) > 0
 
     def test_set_parameters(self):
         processor = SDRProcessor()
@@ -134,6 +135,7 @@ class TestSDRProcessor:
 
 
 # ── Frequency Database Tests ─────────────────────────────────────────────
+
 
 class TestFrequencyDatabase:
     def test_database_loading(self):
@@ -185,7 +187,7 @@ class TestFrequencyDatabase:
         db = get_frequency_database()
         prog = db.get_current_program("BBC LW")
         # May be None if off-air, or a ProgramSchedule
-        assert prog is None or hasattr(prog, 'name')
+        assert prog is None or hasattr(prog, "name")
 
     def test_get_program_schedule(self):
         db = get_frequency_database()
@@ -211,30 +213,36 @@ class TestFrequencyDatabase:
 
 # ── Online DB Tests ─────────────────────────────────────────────────────
 
+
 class TestOnlineDB:
     @pytest.mark.asyncio
     async def test_signal_info_not_found(self):
         from sdr_mcp.online_db import get_signal_info
+
         result = await get_signal_info("XYZZYX_NONEXISTENT_SIGNAL")
         # Should return None or a SignalInfo with empty fields depending on API
-        assert result is None or hasattr(result, 'title')
+        assert result is None or hasattr(result, "title")
 
     def test_encode(self):
         from sdr_mcp.online_db import _encode
+
         assert _encode("hello") == "hello"
         assert "%20" in _encode("hello world")
 
     def test_strip_html(self):
         from sdr_mcp.online_db import _strip_html
+
         assert _strip_html("<b>hello</b> world") == "hello world"
         assert _strip_html("no tags") == "no tags"
 
 
 # ── Transport Tests ─────────────────────────────────────────────────────
 
+
 class TestTransport:
     def test_get_transport_config_defaults(self):
         from sdr_mcp.transport import get_transport_config
+
         cfg = get_transport_config()
         assert cfg["transport"] == "stdio"
         assert cfg["host"] == "127.0.0.1"
@@ -243,6 +251,7 @@ class TestTransport:
 
     def test_create_argument_parser(self):
         from sdr_mcp.transport import create_argument_parser
+
         parser = create_argument_parser("sdr-mcp")
         assert parser is not None
         args = parser.parse_args([])
@@ -251,16 +260,16 @@ class TestTransport:
         assert args.port is None
 
     def test_resolve_transport_default(self):
-        from sdr_mcp.transport import resolve_transport
-        from sdr_mcp.transport import create_argument_parser
+        from sdr_mcp.transport import create_argument_parser, resolve_transport
+
         parser = create_argument_parser("test")
         args = parser.parse_args([])
         transport = resolve_transport(args)
         assert transport in ("stdio", "http", "sse")
 
     def test_resolve_transport_http(self):
-        from sdr_mcp.transport import resolve_transport
-        from sdr_mcp.transport import create_argument_parser
+        from sdr_mcp.transport import create_argument_parser, resolve_transport
+
         parser = create_argument_parser("test")
         args = parser.parse_args(["--http"])
         assert resolve_transport(args) == "http"
@@ -268,28 +277,35 @@ class TestTransport:
 
 # ── CLI Tests ───────────────────────────────────────────────────────────
 
+
 class TestCLI:
     def test_cli_help(self):
-        from sdr_mcp.cli import cli
         from click.testing import CliRunner
+
+        from sdr_mcp.cli import cli
+
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
         assert "SDR MCP" in result.output
 
     def test_serve_help(self):
-        from sdr_mcp.cli import cli
         from click.testing import CliRunner
+
+        from sdr_mcp.cli import cli
+
         runner = CliRunner()
         result = runner.invoke(cli, ["serve", "--help"])
         assert result.exit_code == 0
         assert "Start the SDR MCP server" in result.output
 
     def test_check_no_hardware(self):
-        from sdr_mcp.cli import cli
         from click.testing import CliRunner
-        with patch('sdr_mcp.capture.SDRCapture.is_available', return_value=False):
-            with patch('sdr_mcp.capture.SDRCapture.list_devices', return_value=[]):
+
+        from sdr_mcp.cli import cli
+
+        with patch("sdr_mcp.capture.SDRCapture.is_available", return_value=False):
+            with patch("sdr_mcp.capture.SDRCapture.list_devices", return_value=[]):
                 runner = CliRunner()
                 result = runner.invoke(cli, ["check"])
                 assert result.exit_code == 0
@@ -297,122 +313,157 @@ class TestCLI:
 
 # ── Tool Tests ──────────────────────────────────────────────────────────
 
+
 class TestSDRTools:
     @pytest.mark.asyncio
     async def test_list_devices_no_hardware(self):
-        from sdr_mcp.server import sdr_list_devices
-        with patch('sdr_mcp.capture.SDRCapture.is_available', return_value=False):
-            with patch('sdr_mcp.capture.SDRCapture.list_devices', return_value=[]):
-                result = await sdr_list_devices()
-                assert result['status'] == "no_devices"
+        from sdr_mcp.handlers.state import set_mock_mode
+        from sdr_mcp.server import sdr_device
+
+        set_mock_mode(None)
+        with patch("sdr_mcp.capture.SDRCapture.is_available", return_value=False):
+            with patch("sdr_mcp.capture.SDRCapture.list_devices", return_value=[]):
+                result = await sdr_device(operation="list")
+                assert result["status"] == "success"
+                assert result["mock_mode"] is True
+
+    @pytest.mark.asyncio
+    async def test_list_devices_no_hardware_mock_disabled(self):
+        from sdr_mcp.handlers.state import set_mock_mode
+        from sdr_mcp.server import sdr_device
+
+        set_mock_mode(False)
+        try:
+            with patch("sdr_mcp.capture.SDRCapture.is_available", return_value=False):
+                with patch("sdr_mcp.capture.SDRCapture.list_devices", return_value=[]):
+                    result = await sdr_device(operation="list")
+                    assert result["status"] == "no_devices"
+        finally:
+            set_mock_mode(None)
 
     @pytest.mark.asyncio
     async def test_list_devices_with_hardware(self):
-        from sdr_mcp.server import sdr_list_devices
-        fake_devices = [{'index': 0, 'serial': '0001'}]
-        with patch('sdr_mcp.capture.SDRCapture.is_available', return_value=True):
-            with patch('sdr_mcp.capture.SDRCapture.list_devices', return_value=fake_devices):
-                result = await sdr_list_devices()
-                assert result['status'] == "success"
-                assert result['device_count'] == 1
+        from sdr_mcp.server import sdr_device
+
+        fake_devices = [{"index": 0, "serial": "0001"}]
+        with patch("sdr_mcp.capture.SDRCapture.is_available", return_value=True):
+            with patch("sdr_mcp.capture.SDRCapture.list_devices", return_value=fake_devices):
+                result = await sdr_device(operation="list")
+                assert result["status"] == "success"
+                assert result["device_count"] == 1
 
     @pytest.mark.asyncio
     async def test_tune_preset_valid(self):
-        from sdr_mcp.server import sdr_tune_preset
-        with patch('sdr_mcp.server.get_sdr_capture') as mock_get:
+        from sdr_mcp.server import sdr_device
+
+        with patch("sdr_mcp.handlers.device.get_sdr_capture") as mock_get:
             mock_cap = MagicMock()
             mock_cap.set_frequency = AsyncMock(return_value=True)
             mock_get.return_value = mock_cap
-            result = await sdr_tune_preset("BBC LW")
-            assert result['status'] == "tuned"
-            assert result['callsign'] == "BBC LW"
+            result = await sdr_device(operation="tune_preset", preset_name="BBC LW")
+            assert result["status"] == "tuned"
+            assert result["callsign"] == "BBC LW"
 
     @pytest.mark.asyncio
     async def test_tune_preset_invalid(self):
-        from sdr_mcp.server import sdr_tune_preset
-        result = await sdr_tune_preset("NONEXISTENT_PRESET_XYZ")
-        assert result['status'] == "station_not_found"
+        from sdr_mcp.server import sdr_device
+
+        result = await sdr_device(operation="tune_preset", preset_name="NONEXISTENT_PRESET_XYZ")
+        assert result["status"] == "station_not_found"
 
     @pytest.mark.asyncio
     async def test_search_stations(self):
-        from sdr_mcp.server import sdr_search_stations
-        result = await sdr_search_stations("BBC")
-        assert result['status'] == "found"
-        assert result['total_results'] > 0
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="search", query="BBC")
+        assert result["status"] == "found"
+        assert result["total_results"] > 0
 
     @pytest.mark.asyncio
     async def test_search_stations_no_results(self):
-        from sdr_mcp.server import sdr_search_stations
-        result = await sdr_search_stations("XYZZYX_NONEXISTENT")
-        assert result['status'] == "no_results"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="search", query="XYZZYX_NONEXISTENT")
+        assert result["status"] == "no_results"
 
     @pytest.mark.asyncio
     async def test_get_stations_by_band(self):
-        from sdr_mcp.server import sdr_get_stations_by_band
-        result = await sdr_get_stations_by_band("LW")
-        assert result['status'] == "success"
-        assert result['band'] == "LW"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="by_band", band="LW")
+        assert result["status"] == "success"
+        assert result["band"] == "LW"
 
     @pytest.mark.asyncio
     async def test_get_stations_by_invalid_band(self):
-        from sdr_mcp.server import sdr_get_stations_by_band
-        result = await sdr_get_stations_by_band("INVALID_BAND")
-        assert result['status'] == "invalid_band"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="by_band", band="INVALID_BAND")
+        assert result["status"] == "invalid_band"
 
     @pytest.mark.asyncio
     async def test_get_program_schedule(self):
-        from sdr_mcp.server import sdr_get_program_schedule
-        result = await sdr_get_program_schedule("BBC LW")
-        assert result['status'] == "success"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="schedule", station_callsign="BBC LW")
+        assert result["status"] == "success"
         assert "schedule" in result
 
     @pytest.mark.asyncio
     async def test_get_program_schedule_not_found(self):
-        from sdr_mcp.server import sdr_get_program_schedule
-        result = await sdr_get_program_schedule("NONEXISTENT")
-        assert result['status'] == "station_not_found"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="schedule", station_callsign="NONEXISTENT")
+        assert result["status"] == "station_not_found"
 
     @pytest.mark.asyncio
     async def test_database_stats(self):
-        from sdr_mcp.server import sdr_get_frequency_database_stats
-        result = await sdr_get_frequency_database_stats()
-        assert result['status'] == "success"
-        assert result['database_stats']['total_stations'] > 0
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="stats")
+        assert result["status"] == "success"
+        assert result["database_stats"]["total_stations"] > 0
 
     @pytest.mark.asyncio
     async def test_get_stations_by_country(self):
-        from sdr_mcp.server import sdr_get_stations_by_country
-        result = await sdr_get_stations_by_country("France")
-        assert result['status'] == "success"
-        assert result['total_stations'] > 0
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="by_country", country="France")
+        assert result["status"] == "success"
+        assert result["total_stations"] > 0
 
     @pytest.mark.asyncio
     async def test_get_stations_by_country_not_found(self):
-        from sdr_mcp.server import sdr_get_stations_by_country
-        result = await sdr_get_stations_by_country("Atlantis")
-        assert result['status'] == "no_stations"
+        from sdr_mcp.server import sdr_stations
+
+        result = await sdr_stations(operation="by_country", country="Atlantis")
+        assert result["status"] == "no_stations"
 
     @pytest.mark.asyncio
     async def test_frequency_set_validation(self):
-        from sdr_mcp.server import sdr_set_frequency
-        result = await sdr_set_frequency(frequency_mhz=0.1)  # below 24 MHz min
-        assert result['success'] is False
+        from sdr_mcp.server import sdr_device
+
+        result = await sdr_device(operation="set_frequency", frequency_mhz=0.1)  # below 24 MHz min
+        assert result["success"] is False
 
     @pytest.mark.asyncio
     async def test_set_gain_invalid(self):
-        from sdr_mcp.server import sdr_set_gain
-        result = await sdr_set_gain(gain="garbage")
-        assert result['success'] is False
+        from sdr_mcp.server import sdr_device
+
+        result = await sdr_device(operation="set_gain", gain="garbage")
+        assert result["success"] is False
 
     @pytest.mark.asyncio
     async def test_get_waterfall_empty(self):
-        from sdr_mcp.server import sdr_get_waterfall
-        result = await sdr_get_waterfall()
-        assert result['success'] is True
-        assert result['lines_count'] >= 0
+        from sdr_mcp.server import sdr_spectrum
+
+        result = await sdr_spectrum(operation="waterfall")
+        assert result["success"] is True
+        assert result["lines_count"] >= 0
 
     @pytest.mark.asyncio
     async def test_query_online_database_empty(self):
-        from sdr_mcp.server import sdr_query_online_database
-        result = await sdr_query_online_database(query="", by="name")
-        assert result['status'] in ("no_results", "success", "error")
+        from sdr_mcp.server import sdr_online
+
+        result = await sdr_online(operation="search", query="")
+        assert result["status"] in ("no_results", "success", "error")

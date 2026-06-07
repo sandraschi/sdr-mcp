@@ -1,0 +1,88 @@
+{
+  "examples": [
+    {
+      "title": "List SDR devices",
+      "user_input": "Do I have an RTL-SDR connected?",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "list" },
+      "expected_output": "device list or empty with mock auto fallback noted"
+    },
+    {
+      "title": "Initialize device",
+      "user_input": "Start the SDR on device 0",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "initialize", "device_index": 0 },
+      "expected_output": "success with sample rate and device info"
+    },
+    {
+      "title": "Tune FM station",
+      "user_input": "Tune to 98.5 MHz FM",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "set_frequency", "frequency_mhz": 98.5 },
+      "expected_output": "success with centered frequency"
+    },
+    {
+      "title": "Longwave preset",
+      "user_input": "Tune to ORF longwave",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "tune_preset", "preset_name": "orf_longwave" },
+      "expected_output": "success near 198 kHz"
+    },
+    {
+      "title": "Enable mock mode",
+      "user_input": "Use mock SDR — no hardware",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "mock_mode", "mock_enabled": true },
+      "expected_output": "mock mode enabled"
+    },
+    {
+      "title": "Spectrum snapshot",
+      "user_input": "Show me the spectrum",
+      "tool_call": "sdr_spectrum",
+      "parameters": { "operation": "spectrum" },
+      "expected_output": "FFT bins or image payload"
+    },
+    {
+      "title": "Waterfall frame",
+      "user_input": "Get a waterfall plot",
+      "tool_call": "sdr_spectrum",
+      "parameters": { "operation": "waterfall" },
+      "expected_output": "waterfall data or image"
+    },
+    {
+      "title": "Search stations",
+      "user_input": "Find jazz stations nearby",
+      "tool_call": "sdr_stations",
+      "parameters": { "operation": "search", "query": "jazz" },
+      "expected_output": "matching station records"
+    },
+    {
+      "title": "Stations by band",
+      "user_input": "List FM stations",
+      "tool_call": "sdr_stations",
+      "parameters": { "operation": "by_band", "band": "FM" },
+      "expected_output": "station list for band"
+    },
+    {
+      "title": "Radio Browser lookup",
+      "user_input": "Look up BBC on Radio Browser",
+      "tool_call": "sdr_online",
+      "parameters": { "operation": "radio_browser", "query": "BBC" },
+      "expected_output": "online station matches"
+    },
+    {
+      "title": "GNU Radio FM demod",
+      "user_input": "Demodulate FM with GNU Radio",
+      "tool_call": "sdr_gnuradio",
+      "parameters": { "operation": "demod_fm" },
+      "expected_output": "sidecar status or audio stream info"
+    },
+    {
+      "title": "Health check",
+      "user_input": "Is the SDR server healthy?",
+      "tool_call": "sdr_device",
+      "parameters": { "operation": "health" },
+      "expected_output": "health check summary"
+    }
+  ]
+}

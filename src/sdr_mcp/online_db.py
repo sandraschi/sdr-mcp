@@ -8,10 +8,8 @@ Integrates with:
 These are the only open APIs available for radio data.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 import httpx
 
@@ -33,8 +31,8 @@ class OnlineStation:
     bitrate: int = 0
     url: str = ""
     favicon: str = ""
-    geo_lat: Optional[float] = None
-    geo_long: Optional[float] = None
+    geo_lat: float | None = None
+    geo_long: float | None = None
     stationuuid: str = ""
     clicks: int = 0
 
@@ -66,9 +64,9 @@ async def search_radio_browser(
     query: str,
     limit: int = 25,
     by: str = "name",
-    country: Optional[str] = None,
-    language: Optional[str] = None,
-    tag: Optional[str] = None,
+    country: str | None = None,
+    language: str | None = None,
+    tag: str | None = None,
 ) -> list[OnlineStation]:
     """Search radio-browser.info for stations.
 
@@ -115,7 +113,9 @@ async def search_radio_browser(
     for entry in data[:limit]:
         try:
             tags_raw = entry.get("tags", "")
-            tags = [t.strip() for t in tags_raw.split(",") if t.strip()] if isinstance(tags_raw, str) else (tags_raw or [])
+            tags = (
+                [t.strip() for t in tags_raw.split(",") if t.strip()] if isinstance(tags_raw, str) else (tags_raw or [])
+            )
             station = OnlineStation(
                 name=entry.get("name", "Unknown"),
                 country=entry.get("country", ""),
@@ -137,7 +137,7 @@ async def search_radio_browser(
     return results
 
 
-async def get_signal_info(signal_name: str) -> Optional[SignalInfo]:
+async def get_signal_info(signal_name: str) -> SignalInfo | None:
     """Look up a signal type on the Signal Identification Wiki.
 
     Args:
@@ -168,7 +168,6 @@ async def get_signal_info(signal_name: str) -> Optional[SignalInfo]:
         if not pages:
             return None
         top = pages[0]
-        page_id = top.get("pageid", 0)
         return SignalInfo(
             title=top.get("title", signal_name),
             description=_strip_html(top.get("snippet", "")),
@@ -205,19 +204,21 @@ async def get_signal_categories() -> list[str]:
 def _encode(text: str) -> str:
     """URL-encode a string."""
     import urllib.parse
+
     return urllib.parse.quote(text, safe="")
 
 
 def _strip_html(text: str) -> str:
     """Rough HTML tag stripping."""
     import re
+
     return re.sub(r"<[^>]+>", "", text).strip()
 
 
 __all__ = [
     "OnlineStation",
     "SignalInfo",
-    "search_radio_browser",
-    "get_signal_info",
     "get_signal_categories",
+    "get_signal_info",
+    "search_radio_browser",
 ]

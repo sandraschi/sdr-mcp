@@ -1,112 +1,111 @@
 # MCP Server Tools
 
-All 17 tools exposed by the SDR MCP server. Every tool returns conversational
-responses with guidance, next steps, and educational context.
+Five portmanteau tools replace the original 17 individual tools. Each uses an `operation` parameter.
 
 ---
 
-## Device Management
+## `sdr_device`
 
-### `sdr_list_devices()`
-List connected RTL-SDR hardware.
-- Returns: device count, serial numbers, conversational guidance
-- Demo mode: if no hardware, suggests setup steps
+| Operation | Params | Description |
+|-----------|--------|-------------|
+| `list` | — | List RTL-SDR devices |
+| `initialize` | `device_index` | Open hardware |
+| `status` | — | Current config |
+| `health` | — | RTL-SDR + GNU Radio sidecar aggregate |
+| `set_frequency` | `frequency_mhz` | Tune (24–1766 MHz) |
+| `set_gain` | `gain` | Auto or 0–49.6 dB |
+| `tune_preset` | `preset_name` | Longwave presets |
+| `scan` | `start_freq`, `end_freq`, `step_size` | Frequency scan |
+| `mock_mode` | `mock_enabled` (bool, omit=query) | Synthetic IQ when no dongle |
 
-### `sdr_initialize(device_index=0)`
-Initialize SDR hardware for capture.
-- Configures sample rate (2.048 MHz), center freq (227 MHz), auto gain
-- Returns: device info with frequency, sample rate, gain
+## `sdr_spectrum`
 
-### `sdr_get_status()`
-Current device configuration and health.
+| Operation | Params | Description |
+|-----------|--------|-------------|
+| `spectrum` | — | FFT power spectrum (uses mock automatically if no RTL-SDR) |
+| `waterfall` | — | Waterfall history |
+| `start_websocket` | `host`, `port` | Live stream server (falls back to mock) |
+| `stop_websocket` | — | Stop stream server |
 
-### `sdr_check()`
-CLI-only — quick hardware detection test.
+See [MOCK_SDR.md](MOCK_SDR.md) for mock mode, PyPI research, and env vars (`SDR_MCP_MOCK`).
 
----
+## `sdr_stations`
 
-## Frequency Control
+| Operation | Params | Description |
+|-----------|--------|-------------|
+| `search` | `query`, `band`, `country` | Search local DB |
+| `by_band` | `band` | LW/MW/SW/VHF/UHF |
+| `by_country` | `country` | Filter by country |
+| `schedule` | `station_callsign`, `day` | Program schedule |
+| `stats` | — | Database statistics |
 
-### `sdr_set_frequency(frequency_mhz)`
-Set center frequency.
-- Valid range: 24.0 — 1766.0 MHz (RTL-SDR limits)
-- Input validation rejects out-of-range values
+## `sdr_online`
 
-### `sdr_set_gain(gain="auto")`
-Set receiver gain.
-- `"auto"` for automatic gain control
-- Numeric values 0 — 49.6 dB for manual
+| Operation | Params | Description |
+|-----------|--------|-------------|
+| `search` | `query`, `country`, `language`, `tag`, `limit` | radio-browser.info |
+| `signal_id` | `query` | SigID Wiki lookup |
 
-### `sdr_tune_preset(preset_name)`
-Tune to known longwave stations.
-- Presets: `orf_longwave`, `bbc_radio4`, `france_inter`, `rtl_luxembourg`
-- Also accepts DB callsigns: `"BBC LW"`, `"ORF LW"`
-- Returns: station personality, signal characteristics, program info
+## `sdr_gnuradio`
 
----
+| Operation | Params | Description |
+|-----------|--------|-------------|
+| `health` | — | Sidecar reachable? |
+| `status` | — | Demod process state |
+| `start` | `frequency_mhz`, `mode`, `source`, `gain` | Start demod |
+| `stop` | — | Stop demod |
+| `list_devices` | — | Local RTL-SDR + Soapy scan |
 
-## Spectrum Analysis
-
-### `sdr_get_spectrum()`
-Real-time FFT spectrum.
-- Reads 1M samples, computes 2048-point FFT with Hamming window
-- Returns: frequency array, power spectrum (dB), peak/avg power
-- Also returns: signal count, dynamic range, conversational analysis
-
-### `sdr_get_waterfall()`
-Waterfall history (last 100 FFT lines).
-- Returns: list of power spectra for time-varying display
-
-### `sdr_scan_frequencies(start, end, step)`
-Automated band scan.
-- Background task (`task=True`) — non-blocking
-- Detects signals 5-15 dB above noise floor
-- Returns: full scan results, band context, signal list
+**Modes:** `fm`, `am`, `usb`, `lsb`  
+**Sources:** `rtl_tcp` (Windows host), `hackrf` (Linux/USB)
 
 ---
 
-## Station Database
+## Web API Bridge (port 10892)
 
-### `sdr_search_stations(query, band, country)`
-Search local frequency database.
-- Searches by name, callsign, description
-- Optional band (LW/MW/SW/VHF/UHF) and country filters
+For the dashboard and chat UI:
 
-### `sdr_get_stations_by_band(band)`
-List stations on a frequency band.
-- Groups by country, recommends top stations
+| Endpoint | Method | Body |
+|----------|--------|------|
+| `/api/health` | GET | — |
+| `/api/status` | GET | Live hardware + sidecar snapshot |
+| `/api/chat` | POST | `{ "message": "list devices" }` |
+| `/api/invoke` | POST | `{ "tool": "sdr_device", "params": { "operation": "list" } }` |
 
-### `sdr_get_stations_by_country(country)`
-List stations from a country.
-- Shows band breakdown, station type breakdown
-
-### `sdr_get_program_schedule(callsign, day)`
-Program schedule for a station.
-- Current playing program, daily/weekly view
-- Times in UTC
-
-### `sdr_get_frequency_database_stats()`
-Database statistics (11 stations, 6 countries, 4 bands).
+Started automatically with `just dev` or `sdr-mcp serve --http`.
 
 ---
 
-## Online Databases
+## `sdr_agentic_assist` / `sdr_sampling_hint`
 
-### `sdr_query_online_database(query, by, country, language, tag, limit)`
-Search radio-browser.info (25k+ stations, open API, no key required).
-- Modes: `name`, `country`, `language`, `tag`, `search`, `signal_id`
-- Returns: station name, country, language, codec, bitrate, tags, clicks
-- `signal_id` mode queries SigID Wiki for signal identification
+SEP-1577 sampling tools — require MCP host with `ctx.sample` support (Cursor, Claude Desktop with sampling enabled).
+
+| Tool | Params | Description |
+|------|--------|-------------|
+| `sdr_agentic_assist` | `goal` | Multi-step workflow plan naming portmanteau tools |
+| `sdr_sampling_hint` | `topic` | Frequency/band/tool suggestions |
+
+Returns `success: false` with `recovery_options` when sampling is unavailable.
 
 ---
 
-## Streaming
+## FastMCP 3.4 status
 
-### `sdr_start_websocket_server(host="localhost", port=8765)`
-Start real-time spectrum WebSocket server.
-- Background task — runs capture loop at 100ms intervals
-- Broadcasts FFT data to all connected clients
-- Accepts commands: `set_frequency`, `set_gain`, `clear_waterfall`
+| Feature | Integrated? |
+|---------|-------------|
+| Portmanteau tools | Yes |
+| `ctx.sample` (SEP-1577) | Yes — agentic tools |
+| `ToolResult(is_error=True)` | Not yet — dict errors for now |
+| `@mcp.probe` | **No** — not in FastMCP 3.4.2 API; use `sdr_device(operation='health')` |
+| Prefab UI cards | Partial — `prefab-ui` dep present, not wired to list tools |
+| CodeMode | No — only 7 tools, not needed |
+| `fastmcp-remote` | Documented in fleet docs; use for stdio→HTTP bridge |
 
-### `sdr_stop_websocket_server()`
-Stop WebSocket streaming and cleanup.
+---
+
+- `list devices`
+- `tune 101.5 mhz`
+- `spectrum`
+- `tune bbc longwave`
+- `gnuradio health`
+- `demod 101.5 fm`

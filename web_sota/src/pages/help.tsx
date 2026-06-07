@@ -1,96 +1,49 @@
-import { Book, Code, HelpCircle, Info } from "lucide-react";
+import { HelpCircle } from "lucide-react";
+import { HELP_TABS } from "@/common/help-content";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function Help() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
-            Help & Documentation
-          </h2>
-          <p className="text-slate-400">
-            Guidelines, standards, and usage patterns
-          </p>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+          <HelpCircle className="h-7 w-7 text-cyan-400" />
+          Help & Documentation
+        </h2>
+        <p className="text-slate-400 mt-1">
+          From “what is SDR?” to MCP tools, hardware, audio, and repo docs
+        </p>
+      </div>
+
+      <Tabs defaultValue="start" className="w-full">
+        <div className="overflow-x-auto pb-1 -mx-1 px-1">
+          <TabsList className="inline-flex h-auto min-w-full w-max flex-nowrap gap-1 rounded-lg border border-slate-800 bg-slate-950/80 p-1">
+            {HELP_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="rounded-md px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-cyan-950 data-[state=active]:text-cyan-300 text-slate-400"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </div>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-slate-800 bg-slate-950/50">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Book className="h-5 w-5 text-emerald-500" />
-              <CardTitle className="text-white">Getting Started</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="text-sm text-slate-400 space-y-4">
-            <p>
-              This MCP server provides a standardized interface for Software
-              Defined Radio operations. It acts as a bridge between high-level
-              RF queries and local SDR hardware (RTL-SDR, HackRF, etc.).
-            </p>
-            <p>Key concepts:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>FFT spectral analysis</li>
-              <li>SOTA aesthetics following the Alsergrund Blueprint</li>
-              <li>FastMCP 2.14.4+ dual-transport bridge</li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-800 bg-slate-950/50">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Code className="h-5 w-5 text-blue-500" />
-              <CardTitle className="text-white">Developer Standards</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="text-sm text-slate-400 space-y-4">
-            <p>
-              Follow the
-              [AGENT_PROTOCOLS.md](file:///D:/Dev/repos/mcp-central-docs/standards/AGENT_PROTOCOLS.md)
-              for all modifications. Ensure all new tools follow the portmanteau
-              pattern.
-            </p>
-            <div className="p-3 bg-slate-900 rounded border border-slate-800 font-mono text-xs">
-              <p># Always check port adjacency</p>
-              <p>WEB_PORT = 10886</p>
-              <p>BACKEND_PORT = 10887</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="border-slate-800 bg-slate-950/50">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Info className="h-5 w-5 text-purple-500" />
-            <CardTitle className="text-white">System Information</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-sm text-left text-slate-400">
-            <tbody className="divide-y divide-slate-800">
-              <tr>
-                <td className="py-2 font-medium text-slate-300">
-                  FastMCP Version
-                </td>
-                <td className="py-2 font-mono">2.14.4</td>
-              </tr>
-              <tr>
-                <td className="py-2 font-medium text-slate-300">
-                  Template Mode
-                </td>
-                <td className="py-2">SOTA v2.0 (Feb 2026)</td>
-              </tr>
-              <tr>
-                <td className="py-2 font-medium text-slate-300">Locale</td>
-                <td className="py-2">Vienna (Alsergrund)</td>
-              </tr>
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+        {HELP_TABS.map((tab) => (
+          <TabsContent key={tab.id} value={tab.id} className="mt-4">
+            <Card className="border-slate-800 bg-slate-950/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg text-white">
+                  {tab.label}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>{tab.content}</CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }

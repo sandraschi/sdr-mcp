@@ -3,6 +3,7 @@ CLI interface for SDR MCP Server
 """
 
 import asyncio
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -10,12 +11,13 @@ from rich.text import Text
 
 from .server import mcp
 from .transport import run_server
+from .web_api import get_web_api_config, start_web_api_thread
 
 console = Console()
 
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version="0.4.0")
 def cli():
     """SDR MCP Server - Software Defined Radio tools via Model Context Protocol"""
     pass
@@ -25,25 +27,18 @@ def cli():
 @click.option("--http", "http_mode", is_flag=True, help="Run in HTTP Streamable mode")
 @click.option("--port", type=int, default=None, help="Port for HTTP mode (default: 10891)")
 @click.option("--host", default=None, help="Host for HTTP mode (default: 127.0.0.1)")
-def serve(http_mode: bool, port: int | None, host: str | None):
+@click.option("--web-api-port", type=int, default=None, help="REST bridge port (default: 10892 or SDR_WEB_API_PORT)")
+@click.option("--no-web-api", is_flag=True, help="Disable REST bridge for dashboard (HTTP mode only)")
+def serve(http_mode: bool, port: int | None, host: str | None, no_web_api: bool, web_api_port: int | None):
     """Start the SDR MCP server"""
-    console.print(Panel.fit(
-        Text("SDR MCP Server Starting", style="bold blue"),
-        title="SDR MCP",
-        border_style="blue"
-    ))
+    console.print(Panel.fit(Text("SDR MCP Server Starting", style="bold blue"), title="SDR MCP", border_style="blue"))
 
-    console.print("Available SDR tools:", style="cyan")
-    console.print("  - sdr_list_devices - List connected RTL-SDR devices")
-    console.print("  - sdr_initialize - Initialize SDR hardware")
-    console.print("  - sdr_set_frequency - Tune to specific frequency")
-    console.print("  - sdr_set_gain - Adjust receiver gain")
-    console.print("  - sdr_get_spectrum - Get real-time spectrum data")
-    console.print("  - sdr_get_waterfall - Get waterfall display data")
-    console.print("  - sdr_tune_preset - Tune to longwave presets")
-    console.print("  - sdr_get_status - Get current SDR status")
-    console.print("  - sdr_start_websocket_server - Start real-time streaming")
-    console.print("  - sdr_scan_frequencies - Scan frequency range")
+    console.print("Portmanteau MCP tools:", style="cyan")
+    console.print("  - sdr_device - list, initialize, status, tune, scan")
+    console.print("  - sdr_spectrum - spectrum, waterfall, websocket")
+    console.print("  - sdr_stations - search, by_band, schedule, stats")
+    console.print("  - sdr_online - radio-browser, signal_id")
+    console.print("  - sdr_gnuradio - FM/AM/SSB demod sidecar")
     console.print()
 
     console.print("Longwave presets available:", style="green")
@@ -54,9 +49,33 @@ def serve(http_mode: bool, port: int | None, host: str | None):
     console.print()
 
     import os
+
     transport_mode = "http" if http_mode else os.getenv("MCP_TRANSPORT", "stdio")
     if transport_mode == "http":
-        console.print(f"Starting MCP server in HTTP mode on http://{host or '127.0.0.1'}:{port or 10891}/mcp ...", style="yellow")
+        console.print(
+            f"Starting MCP server in HTTP mode on http://{host or '127.0.0.1'}:{port or 10891}/mcp ...", style="yellow"
+        )
+        if not no_web_api:
+            api_host, default_api_port = get_web_api_config()
+            api_port = web_api_port or default_api_port
+            try:
+                start_web_api_thread(host=api_host, port=api_port)
+            except OSError as exc:
+                console.print(
+                    f"\nWeb API could not bind http://{api_host}:{api_port} — {exc}",
+                    style="bold red",
+                )
+                console.print(
+                    "Port likely in use. Close other sdr-mcp windows or run start.ps1 "
+                    "(it clears ports 10890-10892).",
+                    style="yellow",
+                )
+                console.print(
+                    "Override: set SDR_WEB_API_PORT or use --web-api-port.",
+                    style="yellow",
+                )
+                raise click.Abort() from exc
+            console.print(f"Web API bridge started on http://{api_host}:{api_port}", style="green")
     else:
         console.print("Starting MCP server in STDIO mode - Ready for Claude Desktop!", style="yellow")
 
@@ -72,7 +91,7 @@ def serve(http_mode: bool, port: int | None, host: str | None):
         console.print("\nSDR MCP Server stopped", style="red")
     except Exception as e:
         console.print(f"\nError: {e}", style="red")
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @cli.command()
