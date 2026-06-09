@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import os
@@ -12,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 from urllib.parse import urlparse
 
+from .async_bridge import run_async
 from .capture import SDRCapture
 from .gnuradio_client import GnuradioClient, get_gnuradio_config
 from .handlers.device import get_status
@@ -60,8 +60,21 @@ def parse_chat_command(message: str) -> tuple[str, dict[str, Any]]:
     if "bbc" in text or "longwave" in text or "preset" in text:
         preset = "bbc_radio4" if "bbc" in text else "orf_longwave"
         return "sdr_device", {"operation": "tune_preset", "preset_name": preset}
-    if freq_match and ("tune" in text or "frequency" in text or "mhz" in text):
+    if freq_match and (
+        "tune" in text
+        or "frequency" in text
+        or "mhz" in text
+        or text.startswith("what's on")
+        or text.startswith("whats on")
+    ):
         return "sdr_device", {"operation": "set_frequency", "frequency_mhz": float(freq_match.group(1))}
+    if freq_match and "demod" in text:
+        mode = "am" if " am " in f" {text} " else "fm"
+        return "sdr_gnuradio", {
+            "operation": "start",
+            "frequency_mhz": float(freq_match.group(1)),
+            "mode": mode,
+        }
     if "gnuradio" in text or "demod" in text:
         if "stop" in text:
             return "sdr_gnuradio", {"operation": "stop"}
@@ -182,7 +195,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "ok", "service": "sdr-mcp-web-api"})
             return
         if parsed.path == "/api/status":
-            result = asyncio.run(build_status_snapshot())
+            result = run_async(build_status_snapshot())
             self._send_json(200, result)
             return
         self._send_json(404, {"success": False, "message": "not_found"})
@@ -196,7 +209,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"success": False, "message": "message is required"})
                 return
             tool, params = parse_chat_command(message)
-            result = asyncio.run(invoke_tool(tool, params))
+            result = run_async(invoke_tool(tool, params))
             self._send_json(200, {"success": True, "tool": tool, "params": params, "result": result})
             return
         if parsed.path == "/api/invoke":
@@ -206,7 +219,7 @@ class WebApiHandler(BaseHTTPRequestHandler):
             if not tool:
                 self._send_json(400, {"success": False, "message": "tool is required"})
                 return
-            result = asyncio.run(invoke_tool(tool, params if isinstance(params, dict) else {}))
+            result = run_async(invoke_tool(tool, params if isinstance(params, dict) else {}))
             self._send_json(200, {"success": True, "result": result})
             return
         self._send_json(404, {"success": False, "message": "not_found"})

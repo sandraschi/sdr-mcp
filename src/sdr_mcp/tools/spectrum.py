@@ -6,7 +6,14 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from ..handlers import get_spectrum, get_waterfall, start_websocket_server, stop_websocket_server
+from ..handlers import (
+    get_audio_status,
+    get_spectrum,
+    get_waterfall,
+    get_websocket_status,
+    start_websocket_server,
+    stop_websocket_server,
+)
 
 
 async def sdr_spectrum(
@@ -23,11 +30,22 @@ async def sdr_spectrum(
         return await start_websocket_server(host=host, port=port)
     if operation == "stop_websocket":
         return await stop_websocket_server()
+    if operation == "websocket_status":
+        return await get_websocket_status()
+    if operation == "audio_status":
+        return await get_audio_status()
     return {
         "success": False,
         "status": "error",
         "message": f"Unknown operation: {operation}",
-        "valid_operations": ["spectrum", "waterfall", "start_websocket", "stop_websocket"],
+        "valid_operations": [
+            "spectrum",
+            "waterfall",
+            "start_websocket",
+            "stop_websocket",
+            "websocket_status",
+            "audio_status",
+        ],
     }
 
 

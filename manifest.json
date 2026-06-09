@@ -3,7 +3,7 @@
   "name": "sdr-mcp",
   "version": "0.4.2",
   "description": "RTL-SDR MCP server — spectrum, waterfall, FM audio, station lookup, GNU Radio sidecar.",
-  "long_description": "FastMCP 3.4 MCP server for Software Defined Radio on Windows. Portmanteau tools cover device control, live spectrum/waterfall, station databases, online radio-browser lookup, and optional GNU Radio demod. Mock mode works without USB hardware.",
+  "long_description": "FastMCP 3.4 MCP server for Software Defined Radio. Portmanteau tools cover device control, live spectrum/waterfall, station databases, online radio-browser lookup, and optional GNU Radio demod. Mock mode works without USB hardware. MCPB compatibility is win32 because fleet launchers and WinUSB setup are Windows-first; Linux may work manually with librtlsdr.",
   "author": {
     "name": "Sandra Schi-Avanzini",
     "email": "team@sandraschi.dev"

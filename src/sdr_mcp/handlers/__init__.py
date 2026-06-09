@@ -12,7 +12,14 @@ from .device import (
 )
 from .gnuradio_ops import handle_gnuradio_operation
 from .online import query_online_database
-from .spectrum import get_spectrum, get_waterfall, start_websocket_server, stop_websocket_server
+from .spectrum import (
+    get_audio_status,
+    get_spectrum,
+    get_waterfall,
+    get_websocket_status,
+    start_websocket_server,
+    stop_websocket_server,
+)
 from .stations import (
     get_frequency_database_stats,
     get_program_schedule,
@@ -23,6 +30,7 @@ from .stations import (
 
 __all__ = [
     "configure_mock_mode",
+    "get_audio_status",
     "get_frequency_database_stats",
     "get_program_schedule",
     "get_spectrum",
@@ -30,6 +38,7 @@ __all__ = [
     "get_stations_by_country",
     "get_status",
     "get_waterfall",
+    "get_websocket_status",
     "handle_gnuradio_operation",
     "initialize",
     "list_devices",

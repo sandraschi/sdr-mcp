@@ -20,6 +20,7 @@ VALID_BANDS = {"LW", "MW", "SW", "VHF", "UHF"}
 _sdr_capture: SDRCapture | None = None
 _sdr_processor: SDRProcessor | None = None
 _websocket_server = None
+_websocket_task: asyncio.Task | None = None
 
 # Mock mode: None=auto (mock when no RTL-SDR), True=force mock, False=force hardware
 

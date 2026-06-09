@@ -158,6 +158,10 @@ async def run_server_async(
     logger.info(f"Starting {server_name}")
     logger.info(f"Transport: {t.upper()}")
 
+    from .async_bridge import set_main_event_loop
+
+    set_main_event_loop(asyncio.get_running_loop())
+
     try:
         if t == "stdio":
             logger.info("Running in STDIO mode - Ready for Claude Desktop!")

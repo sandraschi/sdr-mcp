@@ -423,6 +423,17 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                 "status": "invalid_range",
                 "conversation": {"message": f"Step size must be positive (got {step_size})"},
             }
+
+        max_steps = 100
+        step_count = int((end_freq - start_freq) / step_size) + 1
+        if step_count > max_steps:
+            return {
+                "status": "invalid_range",
+                "conversation": {
+                    "message": f"Scan would take {step_count} steps (max {max_steps}). Increase step_size or narrow the range."
+                },
+            }
+
         capture = get_sdr_capture()
         processor = get_sdr_processor()
 
@@ -432,33 +443,35 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
         conversation_progress = []
         detected_signals = []
 
-        while current_freq <= end_freq:
-            await capture.set_frequency(current_freq * 1e6)
-            await asyncio.sleep(0.1)
+        async with _sdr_semaphore:
+            while current_freq <= end_freq:
+                await capture.set_frequency(current_freq * 1e6)
+                await asyncio.sleep(0.1)
 
-            samples = await capture.read_samples(512 * 1024)
-            if samples is not None:
-                spectrum_data = processor.process_samples(samples)
-                spectrum = spectrum_data.get("spectrum", [])
-                max_power = max(spectrum) if spectrum else -100
+                samples = await capture.read_samples(512 * 1024)
+                if samples is not None:
+                    spectrum_data = processor.process_samples(samples)
+                    spectrum = spectrum_data.get("spectrum", [])
+                    max_power = max(spectrum) if spectrum else -100
 
-                result = {
-                    "frequency_mhz": current_freq,
-                    "max_power_db": round(max_power, 1),
-                    "spectrum_data": spectrum_data,
-                    "timestamp": asyncio.get_running_loop().time(),
-                }
-                results.append(result)
+                    result = {
+                        "frequency_mhz": current_freq,
+                        "max_power_db": round(max_power, 1),
+                        "spectrum_data": spectrum_data,
+                        "timestamp": asyncio.get_running_loop().time(),
+                    }
+                    results.append(result)
 
-                if spectrum:
-                    avg_power = sum(spectrum) / len(spectrum)
-                    if max_power > avg_power + 15:
-                        detected_signals.append({"frequency": current_freq, "power": max_power, "strength": "strong"})
-                        conversation_progress.append(f"Strong signal detected at {current_freq:.1f} MHz")
-                    elif max_power > avg_power + 5:
-                        detected_signals.append({"frequency": current_freq, "power": max_power, "strength": "moderate"})
+                    if spectrum:
+                        avg_power = sum(spectrum) / len(spectrum)
+                        if max_power > avg_power + 15:
+                            detected_signals.append({"frequency": current_freq, "power": max_power, "strength": "strong"})
+                            conversation_progress.append(f"Strong signal detected at {current_freq:.1f} MHz")
+                        elif max_power > avg_power + 5:
+                            detected_signals.append({"frequency": current_freq, "power": max_power, "strength": "moderate"})
 
-            current_freq += step_size
+                current_freq += step_size
+                await asyncio.sleep(0)
 
         scan_duration = asyncio.get_running_loop().time() - scan_start_time
 
@@ -522,8 +535,10 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                     "Try narrower scan: step_size=0.1 for detailed analysis",
                 ],
                 "technical_notes": [
-                    f"Average scan time per frequency: {scan_duration / len(results):.2f} seconds",
-                    f"Dynamic range covered: {max([r['max_power_db'] for r in results]) - min([r['max_power_db'] for r in results]):.1f} dB",
+                    f"Average scan time per frequency: {scan_duration / max(len(results), 1):.2f} seconds",
+                    f"Dynamic range covered: {(max([r['max_power_db'] for r in results]) - min([r['max_power_db'] for r in results])):.1f} dB"
+                    if results
+                    else "Dynamic range covered: 0.0 dB",
                     "Signal detection threshold: 5-15 dB above average noise",
                 ],
             },
@@ -532,7 +547,7 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                 "sample_rate": capture.sample_rate,
                 "fft_size": processor.fft_size,
                 "frequency_resolution": capture.sample_rate / processor.fft_size,
-                "processing_efficiency": f"{len(results) / scan_duration:.1f} frequencies/second",
+                "processing_efficiency": f"{len(results) / max(scan_duration, 0.01):.1f} frequencies/second",
             },
         }
     except Exception as e:

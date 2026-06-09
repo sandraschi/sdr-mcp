@@ -40,7 +40,7 @@ jobs:
           uv sync --extra dev
           uv run ruff check src tests
           uv run ruff format --check src tests
-          uv run pytest tests -q --tb=short
+          uv run pytest tests -q --tb=short --cov=sdr_mcp --cov-report=term-missing
 
       - name: Web lint (Biome)
         shell: pwsh

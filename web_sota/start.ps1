@@ -31,6 +31,50 @@ Stop-FleetPortSquatters -Ports @($WebPort, $McpPort, $WebApiPort) -Label "sdr-mc
 
 if (-not (Assert-FleetPortsAvailable -Ports @($WebPort, $McpPort, $WebApiPort) -Label "sdr-mcp")) { exit 1 }
 
+# --- Prereq check (fleet standard) ---
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" +
+            [System.Environment]::GetEnvironmentVariable("PATH","User")
+
+function Require-Command {
+    param([string]$Cmd, [string]$WingetId, [string]$Label)
+    if (Get-Command $Cmd -ErrorAction SilentlyContinue) { return }
+    Write-Host "  $Label not found - installing via winget ..." -ForegroundColor Yellow
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Host "ERROR: winget unavailable. Install $Label manually ($WingetId)." -ForegroundColor Red
+        exit 1
+    }
+    winget install --id $WingetId --silent --accept-source-agreements --accept-package-agreements
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" +
+                [System.Environment]::GetEnvironmentVariable("PATH","User")
+    if (-not (Get-Command $Cmd -ErrorAction SilentlyContinue)) {
+        Write-Host "Installed $Label but '$Cmd' still not in PATH. Reopen PowerShell and retry." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
+Require-Command -Cmd "node" -WingetId "OpenJS.NodeJS.LTS" -Label "Node.js"
+Require-Command -Cmd "uv" -WingetId "astral-sh.uv" -Label "uv"
+
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    $uvFallback = Join-Path $env:USERPROFILE ".local\bin\uv.exe"
+    if (Test-Path $uvFallback) {
+        $env:PATH = (Split-Path $uvFallback -Parent) + ";" + $env:PATH
+    }
+}
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    Write-Host "ERROR: uv not found. Install from https://docs.astral.sh/uv/" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Syncing Python deps (uv sync) ..." -ForegroundColor Cyan
+Push-Location $ProjectRoot
+try {
+    uv sync --extra dev
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+} finally {
+    Pop-Location
+}
+
 Start-Sleep -Milliseconds 400
 
 Write-Host "Starting sdr-mcp web dashboard..." -ForegroundColor Cyan

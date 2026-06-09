@@ -147,7 +147,15 @@ async def start_websocket_server(host: str = "localhost", port: int = 8765) -> d
         if state._websocket_server is None:
             state._websocket_server = SDRWebSocketServer(host=host, port=port)
 
-        asyncio.create_task(state._websocket_server.start())
+        if state._websocket_task and not state._websocket_task.done():
+            return {
+                "success": True,
+                "already_running": True,
+                "websocket_url": f"ws://{host}:{port}",
+                "message": f"WebSocket server already running on ws://{host}:{port}",
+            }
+
+        state._websocket_task = asyncio.create_task(state._websocket_server.start())
 
         return {
             "success": True,
@@ -162,6 +170,14 @@ async def start_websocket_server(host: str = "localhost", port: int = 8765) -> d
 async def stop_websocket_server() -> dict[str, Any]:
     """Stop the WebSocket server for real-time streaming."""
     try:
+        if state._websocket_task and not state._websocket_task.done():
+            state._websocket_task.cancel()
+            try:
+                await state._websocket_task
+            except asyncio.CancelledError:
+                pass
+            state._websocket_task = None
+
         if state._websocket_server:
             await state._websocket_server.stop()
             state._websocket_server = None
@@ -170,3 +186,36 @@ async def stop_websocket_server() -> dict[str, Any]:
     except Exception as e:
         logger.error("Error stopping WebSocket server: %s", e, exc_info=True)
         return {"success": False, "error": str(e)}
+
+
+async def get_websocket_status() -> dict[str, Any]:
+    """Report WebSocket server and FM audio relay status."""
+    from ..audio_stream import get_audio_relay
+
+    relay = get_audio_relay()
+    running = bool(state._websocket_task and not state._websocket_task.done())
+    return {
+        "success": True,
+        "websocket_running": running,
+        "websocket_url": f"ws://{state._websocket_server.host}:{state._websocket_server.port}"
+        if state._websocket_server
+        else None,
+        "connected_clients": len(state._websocket_server.connected_clients) if state._websocket_server else 0,
+        "audio_relay_running": relay.running,
+        "fm_demod": "native Python FM demod streams over WebSocket when sidecar UDP is inactive",
+    }
+
+
+async def get_audio_status() -> dict[str, Any]:
+    """Describe native FM demod and sidecar audio paths."""
+    from ..audio_stream import get_audio_relay
+
+    relay = get_audio_relay()
+    return {
+        "success": True,
+        "native_fm_demod": True,
+        "websocket_audio": bool(state._websocket_task and not state._websocket_task.done()),
+        "sidecar_udp_relay": relay.running,
+        "sample_rate_hz": 48_000,
+        "hint": "Start sdr_spectrum(operation='start_websocket') for browser/dashboard audio",
+    }

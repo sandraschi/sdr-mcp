@@ -9,6 +9,7 @@ These are the only open APIs available for radio data.
 """
 
 import logging
+import time
 from dataclasses import dataclass, field
 
 import httpx
@@ -19,6 +20,7 @@ RADIO_BROWSER_BASE = "https://de1.api.radio-browser.info"
 SIGIDWIKI_BASE = "https://www.sigidwiki.com/api.php"
 
 HTTP_TIMEOUT = 15.0
+CACHE_TTL_SEC = 3600.0
 
 
 @dataclass
@@ -44,6 +46,34 @@ class SignalInfo:
     page_url: str = ""
     category: str = ""
     image_url: str = ""
+
+
+_radio_browser_cache: dict[str, tuple[float, list[OnlineStation]]] = {}
+_signal_info_cache: dict[str, tuple[float, SignalInfo | None]] = {}
+
+
+def _cache_get_radio(key: str) -> list[OnlineStation] | None:
+    entry = _radio_browser_cache.get(key)
+    if not entry:
+        return None
+    expires_at, value = entry
+    if time.monotonic() > expires_at:
+        _radio_browser_cache.pop(key, None)
+        return None
+    return value
+
+
+def _cache_set_radio(key: str, value: list[OnlineStation]) -> None:
+    _radio_browser_cache[key] = (time.monotonic() + CACHE_TTL_SEC, value)
+
+
+def _cache_set_signal(key: str, value: SignalInfo | None) -> None:
+    _signal_info_cache[key] = (time.monotonic() + CACHE_TTL_SEC, value)
+
+
+def _cache_get_signal_stale(key: str) -> SignalInfo | None:
+    entry = _signal_info_cache.get(key)
+    return entry[1] if entry else None
 
 
 async def _get_radio_browser_mirror() -> str:
@@ -82,6 +112,11 @@ async def search_radio_browser(
         List of OnlineStation matching the query.
     """
     base = await _get_radio_browser_mirror()
+    cache_key = f"{base}|{by}|{query}|{country or ''}|{language or ''}|{tag or ''}|{limit}"
+    cached = _cache_get_radio(cache_key)
+    if cached is not None:
+        return cached
+
     results: list[OnlineStation] = []
 
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
@@ -105,6 +140,10 @@ async def search_radio_browser(
             data = resp.json()
         except Exception as e:
             logger.error(f"radio-browser query failed: {e}", exc_info=True)
+            stale = _radio_browser_cache.get(cache_key)
+            if stale:
+                logger.warning("Returning stale radio-browser cache for offline use")
+                return stale[1]
             return results
 
     if not isinstance(data, list):
@@ -134,6 +173,7 @@ async def search_radio_browser(
         except Exception:
             continue
 
+    _cache_set_radio(cache_key, results)
     return results
 
 
@@ -146,6 +186,15 @@ async def get_signal_info(signal_name: str) -> SignalInfo | None:
     Returns:
         SignalInfo with description and links, or None if not found.
     """
+    cache_key = signal_name.strip().lower()
+    stale_value: SignalInfo | None = None
+    entry = _signal_info_cache.get(cache_key)
+    if entry:
+        expires_at, value = entry
+        if time.monotonic() <= expires_at:
+            return value
+        stale_value = value
+
     params = {
         "action": "query",
         "list": "search",
@@ -161,19 +210,25 @@ async def get_signal_info(signal_name: str) -> SignalInfo | None:
             data = resp.json()
         except Exception as e:
             logger.error(f"SigID wiki query failed: {e}", exc_info=True)
+            if stale_value is not None or cache_key in _signal_info_cache:
+                logger.warning("Returning stale SigID cache for offline use")
+                return _cache_get_signal_stale(cache_key)
             return None
 
     try:
         pages = data.get("query", {}).get("search", [])
         if not pages:
+            _cache_set_signal(cache_key, None)
             return None
         top = pages[0]
-        return SignalInfo(
+        info = SignalInfo(
             title=top.get("title", signal_name),
             description=_strip_html(top.get("snippet", "")),
             page_url=f"https://www.sigidwiki.com/wiki/{_encode(top.get('title', signal_name))}",
             category="",
         )
+        _cache_set_signal(cache_key, info)
+        return info
     except Exception as e:
         logger.warning(f"Error parsing sigidwiki response: {e}")
         return None

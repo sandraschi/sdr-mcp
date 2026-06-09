@@ -78,6 +78,20 @@
       "expected_output": "sidecar status or audio stream info"
     },
     {
+      "title": "WebSocket status",
+      "user_input": "Is the spectrum websocket running?",
+      "tool_call": "sdr_spectrum",
+      "parameters": { "operation": "websocket_status" },
+      "expected_output": "websocket_running flag and client count"
+    },
+    {
+      "title": "Audio path status",
+      "user_input": "How does FM audio work?",
+      "tool_call": "sdr_spectrum",
+      "parameters": { "operation": "audio_status" },
+      "expected_output": "native FM demod and sidecar UDP relay status"
+    },
+    {
       "title": "Health check",
       "user_input": "Is the SDR server healthy?",
       "tool_call": "sdr_device",

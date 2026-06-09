@@ -68,6 +68,7 @@ async def query_online_database(
                         "Use by='tag' for genre search",
                         "Use by='name' for station name",
                     ],
+                    "offline_hint": "Results are cached for one hour after a successful lookup when the network is unavailable.",
                 },
             }
 
@@ -97,4 +98,10 @@ async def query_online_database(
 
     except Exception as e:
         logger.error("Online DB query failed: %s", e, exc_info=True)
-        return {"status": "error", "message": f"Online database query failed: {e}"}
+        return {
+            "status": "error",
+            "message": f"Online database query failed: {e}",
+            "conversation": {
+                "offline_hint": "Repeat a query you ran while online — radio-browser results are cached for one hour.",
+            },
+        }

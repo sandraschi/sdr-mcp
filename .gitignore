@@ -81,7 +81,7 @@ profile_default/
 ipython_config.py
 
 # pyenv
-.python-version
+# .python-version tracked for uv/python pin
 
 # pipenv
 Pipfile.lock
@@ -160,4 +160,7 @@ capture_*.dat
 # Build artifacts
 *.egg-info/
 *.bak
+*.mcpb
+mcpb-build/
 _dashboard/
+.llms-fetch-mcp/

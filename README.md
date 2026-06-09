@@ -115,6 +115,8 @@ See [.github/REPOSITORY.md](.github/REPOSITORY.md) for `gh repo edit` commands.
 
 ## Hardware
 
+**Platform:** Developed and tested on **Windows** (WinUSB via Zadig, fleet launchers, MCPB bundle). Core Python code may run on Linux with librtlsdr, but the dashboard launch scripts and MCPB manifest target Windows only.
+
 **Recommended:** [RTL-SDR Blog v4](docs/RTL_SDR_V4.md) (~$35)
 - 24 MHz — 1.766 GHz continuous coverage
 - 0.5 ppm TCXO for frequency stability

@@ -51,25 +51,31 @@ class SDRCapture:
         """Set the center frequency in Hz."""
         if self.sdr:
             try:
-                self.sdr.center_freq = frequency
-                self.center_freq = frequency
+                await asyncio.to_thread(self._set_frequency_sync, frequency)
                 logger.info(f"Frequency set to {frequency / 1e6:.1f} MHz")
                 return True
             except Exception as e:
                 logger.error(f"Failed to set frequency: {e}", exc_info=True)
         return False
 
+    def _set_frequency_sync(self, frequency: float) -> None:
+        self.sdr.center_freq = frequency
+        self.center_freq = frequency
+
     async def set_gain(self, gain: str) -> bool:
         """Set the gain ('auto' or numeric value)."""
         if self.sdr:
             try:
-                self.sdr.gain = gain
-                self.gain = gain
+                await asyncio.to_thread(self._set_gain_sync, gain)
                 logger.info(f"Gain set to {gain}")
                 return True
             except Exception as e:
                 logger.error(f"Failed to set gain: {e}", exc_info=True)
         return False
+
+    def _set_gain_sync(self, gain: str) -> None:
+        self.sdr.gain = gain
+        self.gain = gain
 
     async def read_samples(self, num_samples: int = 1024 * 1024) -> np.ndarray | None:
         """Read IQ samples from the SDR without blocking the event loop."""
