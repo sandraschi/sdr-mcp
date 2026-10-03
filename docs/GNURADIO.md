@@ -9,7 +9,7 @@ the host, GNU Radio runs in Docker, and both connect via `rtl_tcp`.
 RTL-SDR (USB, Windows host)
     ↓ rtl_tcp :1234
 GNU Radio container (WSL2/Docker)
-    ↓ HTTP :10900
+    ↓ HTTP :11223
 sdr-mcp MCP tools (sdr_gnuradio)
 ```
 
@@ -64,7 +64,7 @@ Sidecar env (set in `docker-compose.yml`):
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `GNURADIO_DEMOD_URL` | `http://127.0.0.1:10900` | Sidecar HTTP API |
+| `GNURADIO_DEMOD_URL` | `http://127.0.0.1:11223` | Sidecar HTTP API |
 | `RTL_TCP_HOST` | `127.0.0.1` | rtl_tcp host (from sdr-mcp's view) |
 | `RTL_TCP_PORT` | `1234` | rtl_tcp port |
 
@@ -105,7 +105,7 @@ docker/gnuradio/
 ├── demod_service.py    # HTTP control plane
 └── receiver.py         # FM/AM/USB/LSB flowgraph → UDP audio
 
-docker-compose.yml      # gnuradio-demod service on port 10900
+docker-compose.yml      # gnuradio-demod service on port 11223
 scripts/start-rtl-tcp.ps1
 ```
 

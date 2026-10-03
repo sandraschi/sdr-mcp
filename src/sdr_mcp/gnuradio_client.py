@@ -15,7 +15,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 ENV_GNURADIO_URL = "GNURADIO_DEMOD_URL"
-DEFAULT_GNURADIO_URL = "http://127.0.0.1:10900"
+DEFAULT_GNURADIO_URL = "http://127.0.0.1:11223"
 DEFAULT_RTL_TCP_HOST = "host.docker.internal"
 DEFAULT_RTL_TCP_PORT = 1234
 

@@ -4,7 +4,7 @@ services:
       context: ./docker/gnuradio
     container_name: sdr-mcp-gnuradio
     ports:
-      - "10900:8000"
+      - "11223:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

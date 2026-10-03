@@ -10,7 +10,7 @@ class TestGnuradioClient:
         from sdr_mcp.gnuradio_client import get_gnuradio_config
 
         config = get_gnuradio_config()
-        assert config["service_url"] == "http://127.0.0.1:10900"
+        assert config["service_url"] == "http://127.0.0.1:11223"
         assert config["rtl_tcp_port"] == 1234
 
     @pytest.mark.asyncio
