@@ -919,13 +919,13 @@ rtl_tcp -a 127.0.0.1 -p 1234
 just gnuradio-up
 ```
 
-This starts the Docker container with the GNU Radio demod service listening on http://127.0.0.1:10900/.
+This starts the Docker container with the GNU Radio demod service listening on http://127.0.0.1:11223/.
 
 ### Step 3: Verify connectivity
 
 ```python
 sdr_gnuradio(operation="health")
-# Expected: {"status": "success", "service_url": "http://127.0.0.1:10900"}
+# Expected: {"status": "success", "service_url": "http://127.0.0.1:11223"}
 ```
 
 ### Step 4: Start demodulation
@@ -949,7 +949,7 @@ Audio flows from: rtl_tcp -> GNU Radio container (FM demod) -> UDP port 7355 -> 
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| GNURADIO_DEMOD_URL | http://127.0.0.1:10900 | GNU Radio HTTP API |
+| GNURADIO_DEMOD_URL | http://127.0.0.1:11223 | GNU Radio HTTP API |
 | RTL_TCP_HOST | 127.0.0.1 | rtl_tcp host address |
 | RTL_TCP_PORT | 1234 | rtl_tcp TCP port |
 

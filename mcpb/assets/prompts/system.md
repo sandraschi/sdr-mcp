@@ -24,7 +24,7 @@ Claude Desktop / Cursor  <--MCP/STDIO-->  sdr-mcp (FastMCP 3.4)
                                               ├── pyrtlsdr (RTL-SDR hardware)
                                               ├── numpy/scipy (FFT processing)
                                               ├── WebSocket server (port 8765)
-                                              ├── GNU Radio sidecar (Docker, port 10900)
+                                              ├── GNU Radio sidecar (Docker, port 11223)
                                               ├── rtl_tcp (port 1234)
                                               ├── UDP Audio Relay (port 7355)
                                               └── REST Web API (port 10892)
@@ -133,7 +133,7 @@ Returns: current mock setting, active state, hardware availability.
 # Health check
 {"success": True, "status": "ok",
  "rtl_sdr": {"available": True, "device_count": 1, "devices": [...]},
- "gnuradio_sidecar": {"reachable": True, "service_url": "http://127.0.0.1:10900"}}
+ "gnuradio_sidecar": {"reachable": True, "service_url": "http://127.0.0.1:11223"}}
 
 # Scan complete
 {"status": "scan_complete",
@@ -455,7 +455,7 @@ Returns: device list, availability, source type.
 
 ```python
 # Health
-{"status": "success", "service_url": "http://127.0.0.1:10900",
+{"status": "success", "service_url": "http://127.0.0.1:11223",
  "conversation": {"message": "GNU Radio sidecar is online.", ...}}
 
 # Start demod
@@ -469,7 +469,7 @@ Returns: device list, availability, source type.
  "conversation": {"message": "GNU Radio demod stopped."}}
 
 # Unreachable
-{"status": "unreachable", "service_url": "http://127.0.0.1:10900",
+{"status": "unreachable", "service_url": "http://127.0.0.1:11223",
  "conversation": {"message": "GNU Radio sidecar not reachable. Run: just gnuradio-up",
                   "next_steps": ["Start rtl_tcp: scripts/start-rtl-tcp.ps1", ...]}}
 ```
@@ -571,7 +571,7 @@ await sdr_sampling_hint(topic="longwave radio in Central Europe")
 | MCP_PATH | "/mcp" | MCP HTTP endpoint path |
 | SDR_WEB_API_PORT | 10892 | REST bridge port for web dashboard |
 | SDR_WEB_API_HOST | "127.0.0.1" | REST bridge bind address |
-| GNURADIO_DEMOD_URL | "http://127.0.0.1:10900" | GNU Radio sidecar HTTP API |
+| GNURADIO_DEMOD_URL | "http://127.0.0.1:11223" | GNU Radio sidecar HTTP API |
 | RTL_TCP_HOST | "127.0.0.1" | rtl_tcp host for GNU Radio sidecar |
 | RTL_TCP_PORT | 1234 | rtl_tcp port for GNU Radio sidecar |
 
@@ -584,7 +584,7 @@ await sdr_sampling_hint(topic="longwave radio in Central Europe")
 | 10892 | REST Web API (chat/status bridge) |
 | 8765 | WebSocket spectrum streaming |
 | 7355 | UDP audio relay (PCM from GNU Radio) |
-| 10900 | GNU Radio sidecar HTTP API |
+| 11223 | GNU Radio sidecar HTTP API |
 | 1234 | rtl_tcp (IQ samples for GNU Radio) |
 
 ### Mock Mode
