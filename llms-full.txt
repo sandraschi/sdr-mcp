@@ -18,7 +18,8 @@ Claude / Cursor ← MCP stdio → SDR MCP Server ← WebSocket → Web dashboard
 |---------|------|
 | Frontend (Vite React) | 11118 |
 | MCP HTTP (/mcp) | 11119 |
-| Web API (REST bridge) | 10892 |
+| GNU Radio demod sidecar | 11223 (compose `gnuradio-demod`, container 8000) |
+| Legacy REST bridge (web_api.py, `sdr-mcp serve --http` only) | 10892 (SDR_WEB_API_PORT; NOT served by start.ps1) |
 
 ## MCP Tools
 

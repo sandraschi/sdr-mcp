@@ -22,7 +22,7 @@
       "command": "python",
       "args": ["-m", "sdr_mcp.cli", "serve"],
       "env": {
-        "PYTHONPATH": "${PWD}/src",
+        "PYTHONPATH": "${__dirname}/src",
         "PYTHONUNBUFFERED": "1",
         "PYTHONIOENCODING": "utf-8:replace",
         "FASTMCP_NO_BANNER": "1"

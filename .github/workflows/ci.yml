@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
+    branches: ["main", "master"]
     tags: ["v*"]
+  pull_request:
+    branches: ["main", "master"]
   workflow_dispatch:
 
 jobs:
@@ -40,3 +43,9 @@ jobs:
         run: |
           npm ci
           npm run lint
+
+      - name: Web typecheck + build (tsc)
+        shell: pwsh
+        working-directory: web_sota
+        run: |
+          npm run build

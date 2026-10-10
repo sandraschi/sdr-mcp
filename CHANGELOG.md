@@ -1,4 +1,19 @@
 
+## [Unreleased] — 2026-10-10 (assfix)
+
+### Fixed
+- Manifest `${PWD}` -> `${__dirname}` (MCPB NONSPEC: bundle failed on real install)
+- Ruff: un-ignored S110/S112 and fixed 3 silent swallows (audio_stream, online_db, websocket_server); added T20
+- Webapp ports: api.ts/api-client/vite proxy now target registry backend 11119 (was 10977/10892)
+- tsc: 5 errors fixed (Float32Array typing, unused vars, useRef init, srlimit string); `npm run build` green
+- Tool docstrings: `## Return Format` + `## Examples` on all 7 tools; `Args:` -> Parameters prose
+- Session injection: `.claude-plugin` SessionStart hook; `.gitattributes` LF; `.gitignore` reports/node_modules
+- CI: added `npm run build` type gate so tsc failures break CI again; restored `scripts/mcpb-pack.ps1`
+
+### Deferred (tracking issue)
+- `POST /api/shutdown`, docs/ set, onboarding, LLM elicitation endpoints, @tauri-apps/api wiring,
+  Prefab/annotations/output_schema, skillbuild, coverage gate, e2e, pyright, diagnostics endpoint
+
 ## [Unreleased] — 2026-06-14
 
 ### Added
@@ -154,4 +169,3 @@ All notable changes to this project will be documented in this file.
 - WebSocket streaming server
 - React web dashboard with 7 placeholder pages
 - CLI with serve/check/test commands
-

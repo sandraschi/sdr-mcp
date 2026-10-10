@@ -29,6 +29,8 @@ dependencies = [
     "click>=8.0.0,<9.0.0",
     "rich>=13.0.0,<14.0.0",
     "prefab-ui>=0.14.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
 ]
 
 [project.optional-dependencies]
@@ -70,8 +72,8 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "S", "UP", "RUF"]
-ignore = ["S101", "B008", "E501", "S110", "S101", "B008", "E501", "S110", "S112", "RUF006", "S106", "S101", "B008", "E501", "S110", "S101", "B008", "E501", "S110", "S112", "RUF006", "S106", "RUF012", "RUF006", "S603", "S607", "S324", "E402", "RUF006"]
+select = ["E", "F", "W", "I", "B", "S", "UP", "RUF", "T20"]
+ignore = ["S101", "B008", "E501", "RUF006", "S106", "RUF012", "S603", "S607", "S324", "E402"]
 
 [tool.ruff.format]
 quote-style = "double"

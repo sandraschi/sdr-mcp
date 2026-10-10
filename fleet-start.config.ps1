@@ -1,4 +1,4 @@
-﻿# Per-repo fleet start config for sdr-mcp
+# Per-repo fleet start config for sdr-mcp
 # Edit ports/backend target here - start.ps1 is fleet-standard.
 @{
     Name         = 'sdr-mcp'
@@ -11,6 +11,7 @@
         UvicornTarget = 'server:app'
         WorkDir       = 'web_sota\backend'
         SyncExtras    = @('dev')
+        SyncOnStart  = $true
         Env           = @{ WEB_PORT = '11119' }
     }
     Frontend = @{

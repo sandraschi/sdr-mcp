@@ -15,18 +15,15 @@ bootstrap:
 
 # Start MCP server (STDIO)
 serve:
-    Set-Location '{{justfile_directory()}}'
-    uv run sdr-mcp serve
+    Set-Location '{{justfile_directory()}}'; uv run sdr-mcp serve
 
 # Start MCP server in HTTP mode
 serve-http:
-    Set-Location '{{justfile_directory()}}'
-    uv run sdr-mcp serve --http
+    Set-Location '{{justfile_directory()}}'; uv run sdr-mcp serve --http
 
 # Start backend + web dashboard
 dev:
-    Set-Location '{{justfile_directory()}}'
-    powershell.exe -NoProfile -File .\start.ps1
+    Set-Location '{{justfile_directory()}}'; powershell.exe -NoProfile -File .\start.ps1
 
 # Start rtl_tcp on the Windows host (separate terminal)
 rtl-tcp:
@@ -34,13 +31,11 @@ rtl-tcp:
 
 # Build and start GNU Radio demod sidecar
 gnuradio-up:
-    Set-Location '{{justfile_directory()}}'
-    docker compose up -d --build gnuradio-demod
+    Set-Location '{{justfile_directory()}}'; docker compose up -d --build gnuradio-demod
 
 # Stop GNU Radio demod sidecar
 gnuradio-down:
-    Set-Location '{{justfile_directory()}}'
-    docker compose down
+    Set-Location '{{justfile_directory()}}'; docker compose down
 
 # --- Quality ---
 
