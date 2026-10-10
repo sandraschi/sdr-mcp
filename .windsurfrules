@@ -1,0 +1,11 @@
+## Session Context (SDR-MCP)
+
+You have access to Software Defined Radio tools: RTL-SDR device control, spectrum analysis, station databases, and GNU Radio demod.
+
+**Before starting work:**
+1. Check SDR device status: `sdr_device(operation="health")`
+2. Check available devices: `sdr_device(operation="list")`
+3. Get initial spectrum: `sdr_spectrum(operation="spectrum")`
+
+**At end of work:**
+- Stop GNU Radio sidecar if running: `sdr_gnuradio(operation="stop")`

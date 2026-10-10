@@ -38,7 +38,7 @@ async def list_devices() -> dict[str, Any]:
                 "device_count": 1,
                 "devices": [{"index": 0, "serial": "MOCK-0001", "mock": True}],
                 "conversation": {
-                    "message": "Mock SDR active — synthetic IQ drives FFT and waterfall without a dongle.",
+                    "message": "Mock SDR active - synthetic IQ drives FFT and waterfall without a dongle.",
                     "next_steps": [
                         "Run sdr_spectrum(operation='spectrum') for a demo FFT",
                         "Run sdr_spectrum(operation='start_websocket') for live dashboard plots",
@@ -103,7 +103,7 @@ async def list_devices() -> dict[str, Any]:
                         "Try different USB ports",
                         "Verify RTL-SDR model compatibility",
                     ],
-                    "fallback_message": "Don't have hardware? Mock mode activates automatically — try sdr_spectrum(operation='spectrum').",
+                    "fallback_message": "Don't have hardware? Mock mode activates automatically - try sdr_spectrum(operation='spectrum').",
                 },
                 "sampling": {
                     "demo_mode": True,
@@ -392,9 +392,9 @@ async def configure_mock_mode(mock_enabled: bool | None = None) -> dict[str, Any
             "hardware_available": SDRCapture.is_available(),
             "device_info": capture.get_info() if active else None,
             "message": (
-                "Mock IQ generator active — spectrum and waterfall work without RTL-SDR."
+                "Mock IQ generator active - spectrum and waterfall work without RTL-SDR."
                 if active
-                else "Hardware capture path selected — initialize RTL-SDR before spectrum."
+                else "Hardware capture path selected - initialize RTL-SDR before spectrum."
             ),
             "env_hint": "Set SDR_MCP_MOCK=enable|disable|auto for startup default",
         }

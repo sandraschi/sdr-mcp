@@ -88,6 +88,19 @@ function Test-DockerDaemon {
     return $false
 }
 
+function Wait-DockerDaemon {
+    # Polls Test-DockerDaemon every 5s up to -TimeoutSec, returning as soon as it
+    # comes up rather than sleeping the full fixed duration then checking once.
+    param([int]$TimeoutSec = 60)
+    $elapsed = 0
+    while ($elapsed -lt $TimeoutSec) {
+        if (Test-DockerDaemon) { return $true }
+        Start-Sleep -Seconds 5
+        $elapsed += 5
+    }
+    return $false
+}
+
 function Test-ContainerHealth {
     param([string[]]$Names)
     if (-not $Names) { return @{} }
@@ -160,12 +173,17 @@ function Invoke-DaemonRecovery {
     Write-Log "INFO" "Docker Desktop process: $(if($ddProcess){'Running PID='+$ddProcess.Id}else{'Not running'})"
     Write-Log "INFO" "WSL docker-desktop state: $wslState"
 
+    # HARDENED 2026-09-17 (TRAPS_AND_PITFALLS.md #36): the three waits below used
+    # to be a single fixed-length Start-Sleep followed by one Test-DockerDaemon
+    # check - a daemon that came up one second after the deadline was reported as
+    # still-failed, and the "kill then sleep 10" before a hard restart never
+    # checked the old processes actually died before relaunching. Now polls with
+    # early exit on success, and verifies the kill.
     if (-not $ddProcess) {
         Write-Log "RECOVER" "Docker Desktop not running - attempting to start..."
         if (Start-DockerDesktop) {
-            Write-Log "INFO" "Waiting 60s for Docker Desktop initialization..."
-            Start-Sleep -Seconds 60
-            if (Test-DockerDaemon) {
+            Write-Log "INFO" "Waiting up to 60s for Docker Desktop initialization..."
+            if (Wait-DockerDaemon -TimeoutSec 60) {
                 Show-Notification "Docker Recovered" "Docker Desktop started successfully (attempt $Attempt)."
                 return $true
             }
@@ -177,22 +195,25 @@ function Invoke-DaemonRecovery {
         wsl --terminate docker-desktop 2>$null
         wsl --terminate docker-desktop-data 2>$null
         Start-Sleep -Seconds 5
-        Write-Log "INFO" "Waiting 30s for WSL restart..."
-        Start-Sleep -Seconds 30
-        if (Test-DockerDaemon) {
+        Write-Log "INFO" "Waiting up to 30s for WSL restart..."
+        if (Wait-DockerDaemon -TimeoutSec 30) {
             Show-Notification "Docker Recovered" "WSL restart resolved daemon (attempt $Attempt)."
             return $true
         }
     }
 
     Write-Log "RECOVER" "Hard restart: killing Docker Desktop and relaunching..."
-    Get-Process "Docker Desktop", "com.docker.backend", "com.docker.build" -ErrorAction SilentlyContinue |
-        Stop-Process -Force
-    Start-Sleep -Seconds 10
+    $dockerProcNames = "Docker Desktop", "com.docker.backend", "com.docker.build"
+    Get-Process $dockerProcNames -ErrorAction SilentlyContinue | Stop-Process -Force
+    $killWaitSec = 10
+    $killElapsed = 0
+    while ($killElapsed -lt $killWaitSec -and (Get-Process $dockerProcNames -ErrorAction SilentlyContinue)) {
+        Start-Sleep -Milliseconds 500
+        $killElapsed += 0.5
+    }
     if (Start-DockerDesktop) {
-        Write-Log "INFO" "Waiting 90s for full Docker Desktop initialization..."
-        Start-Sleep -Seconds 90
-        if (Test-DockerDaemon) {
+        Write-Log "INFO" "Waiting up to 90s for full Docker Desktop initialization..."
+        if (Wait-DockerDaemon -TimeoutSec 90) {
             Show-Notification "Docker Recovered" "Hard restart recovered daemon (attempt $Attempt)."
             return $true
         }
