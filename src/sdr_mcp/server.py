@@ -1,4 +1,4 @@
-"""SDR MCP Server — FastMCP instance and tool registration."""
+"""SDR MCP Server - FastMCP instance and tool registration."""
 
 from __future__ import annotations
 

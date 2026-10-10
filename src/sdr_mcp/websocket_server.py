@@ -82,7 +82,7 @@ class SDRWebSocketServer:
         if await capture.initialize():
             return True
 
-        logger.warning("RTL-SDR init failed — enabling mock IQ for WebSocket stream")
+        logger.warning("RTL-SDR init failed - enabling mock IQ for WebSocket stream")
         set_mock_mode(True)
         return await get_sdr_capture().initialize()
 
@@ -275,7 +275,7 @@ class SDRWebSocketServer:
             try:
                 await client.close()
             except Exception:
-                pass
+                logger.exception("Error closing websocket client")
 
         self.connected_clients.clear()
 

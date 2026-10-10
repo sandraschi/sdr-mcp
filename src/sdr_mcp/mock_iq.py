@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-# Tone offsets (Hz from center) and relative amplitudes — visible in FFT/waterfall demos.
+# Tone offsets (Hz from center) and relative amplitudes - visible in FFT/waterfall demos.
 _DEFAULT_TONES: tuple[tuple[float, float], ...] = (
     (200_000.0, 0.30),
     (-150_000.0, 0.15),

@@ -1,4 +1,4 @@
-"""Mock RTL-SDR capture — synthetic IQ for demo UI and tests without hardware."""
+"""Mock RTL-SDR capture - synthetic IQ for demo UI and tests without hardware."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class MockSDRCapture:
 
     def __init__(self, device_index: int = 0) -> None:
         self.device_index = device_index
-        self.sdr = object()  # truthy sentinel — matches SDRCapture after init
+        self.sdr = object()  # truthy sentinel - matches SDRCapture after init
         self.is_running = False
         self.sample_rate = 2.048e6
         self.center_freq = 227e6

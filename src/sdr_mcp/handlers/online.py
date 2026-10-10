@@ -102,6 +102,6 @@ async def query_online_database(
             "status": "error",
             "message": f"Online database query failed: {e}",
             "conversation": {
-                "offline_hint": "Repeat a query you ran while online — radio-browser results are cached for one hour.",
+                "offline_hint": "Repeat a query you ran while online - radio-browser results are cached for one hour.",
             },
         }
