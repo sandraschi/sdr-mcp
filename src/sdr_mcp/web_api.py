@@ -19,6 +19,25 @@ from .handlers.state import get_mock_mode_label, should_use_mock
 
 logger = logging.getLogger(__name__)
 
+# Allowed dashboard origins for the legacy REST bridge (mirrors the FastAPI
+# CORSMiddleware policy: registry ports 11118/11119 + 10892 legacy, localhost,
+# LAN, Tailscale, Tauri). Browsers sending any other Origin get no
+# Access-Control-Allow-Origin header (same policy as the FastAPI backends).
+_ALLOWED_ORIGIN_RE = re.compile(
+    r"^(https?://(localhost|127\.0\.0\.1|tauri\.localhost"
+    r"|[a-zA-Z0-9-]+\.ts\.net|.*\.tail-[a-f0-9]+\.ts\.net"
+    r"|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+    r"|100\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?|tauri://localhost)$"
+)
+
+
+def _cors_origin(headers) -> str | None:
+    origin = headers.get("Origin")
+    if origin and _ALLOWED_ORIGIN_RE.match(origin):
+        return origin
+    return None
+
+
 DEFAULT_WEB_API_HOST = "127.0.0.1"
 DEFAULT_WEB_API_PORT = 10892
 ENV_WEB_API_HOST = "SDR_WEB_API_HOST"
@@ -165,7 +184,9 @@ class WebApiHandler(BaseHTTPRequestHandler):
         body = json.dumps(payload, default=str).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = _cors_origin(self.headers)
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
@@ -184,7 +205,9 @@ class WebApiHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self) -> None:
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = _cors_origin(self.headers)
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -245,7 +268,7 @@ def run_web_api(
             ready.set()
         server.serve_forever()
     except OSError as exc:
-        logger.error("Web API failed to bind http://%s:%s — %s", bind_host, bind_port, exc)
+        logger.error("Web API failed to bind http://%s:%s - %s", bind_host, bind_port, exc)
         if error_box is not None:
             error_box.append(exc)
         if ready is not None:

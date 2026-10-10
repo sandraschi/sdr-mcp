@@ -21,7 +21,18 @@ async def sdr_spectrum(
     host: str = "localhost",
     port: int = 8765,
 ) -> dict[str, Any]:
-    """Portmanteau SDR spectrum and streaming operations."""
+    """Portmanteau SDR spectrum and streaming operations.
+
+    ## Return Format
+    `{"success": bool, "message": str, ...}` - success flag with a human-readable
+    message plus operation-specific fields (`spectrum`, `waterfall`, `running`).
+    Unknown operations return `success: False` with `valid_operations`.
+
+    ## Examples
+    `sdr_spectrum(operation="spectrum")` -> `{"success": True, "spectrum": [...]}`
+    `sdr_spectrum(operation="waterfall")` -> waterfall history lines
+    `sdr_spectrum(operation="start_websocket")` -> start ws://localhost:8765 stream
+    """
     if operation == "spectrum":
         return await get_spectrum()
     if operation == "waterfall":

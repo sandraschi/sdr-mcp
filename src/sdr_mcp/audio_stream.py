@@ -93,7 +93,7 @@ class AudioRelay:
                 self._output_stream.stop()
                 self._output_stream.close()
             except Exception:
-                pass
+                logger.exception("Error closing audio playback stream")
             self._output_stream = None
 
     def _listen_loop(self) -> None:

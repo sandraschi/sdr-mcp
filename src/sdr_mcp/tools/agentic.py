@@ -12,6 +12,13 @@ async def sdr_agentic_assist(goal: str, ctx: Context) -> dict[str, Any]:
 
     Names concrete portmanteau tools: sdr_device, sdr_spectrum, sdr_stations,
     sdr_online, sdr_gnuradio. Requires a sampling-capable MCP host.
+
+    ## Return Format
+    `{"success": bool, "plan": str, "goal": str}` on success; on failure
+    `{"success": False, "error": str, "error_type": str, "recovery_options": [...]}`.
+
+    ## Examples
+    `sdr_agentic_assist(goal="find jazz on FM")` -> numbered tool plan
     """
     try:
         result = await ctx.sample(
@@ -44,7 +51,15 @@ async def sdr_agentic_assist(goal: str, ctx: Context) -> dict[str, Any]:
 
 
 async def sdr_sampling_hint(topic: str, ctx: Context) -> dict[str, Any]:
-    """Suggest frequencies, bands, and tool sequence for a radio topic via ctx.sample."""
+    """Suggest frequencies, bands, and tool sequence for a radio topic via ctx.sample.
+
+    ## Return Format
+    `{"success": bool, "suggestions": str, "topic": str}` on success; on failure
+    `{"success": False, "error": str, "error_type": str, "recovery_options": [...]}`.
+
+    ## Examples
+    `sdr_sampling_hint(topic="shortwave numbers stations")` -> 3-5 actions with band hints
+    """
     try:
         result = await ctx.sample(
             messages=(

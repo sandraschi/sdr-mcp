@@ -23,7 +23,18 @@ async def sdr_stations(
     station_callsign: str = "",
     day: str | None = None,
 ) -> dict[str, Any]:
-    """Portmanteau SDR station database operations."""
+    """Portmanteau SDR station database operations.
+
+    ## Return Format
+    `{"success": bool, "message": str, ...}` - success flag with a human-readable
+    message plus operation-specific fields (`stations`, `schedule`, `stats`).
+    Unknown operations return `success: False` with `valid_operations`.
+
+    ## Examples
+    `sdr_stations(operation="search", query="BBC")` -> matching stations
+    `sdr_stations(operation="by_band", band="FM")` -> stations in band
+    `sdr_stations(operation="stats")` -> database counts
+    """
     if operation == "search":
         return await search_stations(query=query, band=band, country=country or None)
     if operation == "by_band":

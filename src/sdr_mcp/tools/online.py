@@ -17,7 +17,17 @@ async def sdr_online(
     tag: str = "",
     limit: int = 25,
 ) -> dict[str, Any]:
-    """Portmanteau online station lookup operations."""
+    """Portmanteau online station lookup operations.
+
+    ## Return Format
+    `{"success": bool, "message": str, ...}` - success flag with a human-readable
+    message plus operation-specific fields (`stations`, `signal`).
+    Unknown operations return `success: False` with `valid_operations`.
+
+    ## Examples
+    `sdr_online(operation="search", query="jazz")` -> radio-browser matches
+    `sdr_online(operation="signal_id", query="FT8")` -> signal wiki info
+    """
     if operation == "search":
         return await query_online_database(
             query=query,

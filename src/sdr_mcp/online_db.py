@@ -100,7 +100,7 @@ async def search_radio_browser(
 ) -> list[OnlineStation]:
     """Search radio-browser.info for stations.
 
-    Args:
+    Parameters:
         query: Search term (ignored for by=country/language/tag).
         limit: Max results per endpoint call (max 100).
         by: Search mode: 'name', 'country', 'language', 'tag', or 'search'.
@@ -171,6 +171,7 @@ async def search_radio_browser(
             )
             results.append(station)
         except Exception:
+            logger.exception("Skipping malformed radio-browser entry")
             continue
 
     _cache_set_radio(cache_key, results)
@@ -180,7 +181,7 @@ async def search_radio_browser(
 async def get_signal_info(signal_name: str) -> SignalInfo | None:
     """Look up a signal type on the Signal Identification Wiki.
 
-    Args:
+    Parameters:
         signal_name: Signal name to search for (e.g. 'AM', 'FM', 'DAB').
 
     Returns:

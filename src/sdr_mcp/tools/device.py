@@ -30,7 +30,18 @@ async def sdr_device(
     step_size: float = 1.0,
     mock_enabled: bool | None = None,
 ) -> dict[str, Any]:
-    """Portmanteau SDR device operations (list, initialize, tune, scan)."""
+    """Portmanteau SDR device operations (list, initialize, tune, scan).
+
+    ## Return Format
+    `{"success": bool, "message": str, ...}` - success flag with a human-readable
+    message plus operation-specific fields (`devices`, `device_info`, `peaks`).
+    Unknown operations return `success: False` with `valid_operations`.
+
+    ## Examples
+    `sdr_device(operation="list")` -> `{"success": True, "devices": [...]}`
+    `sdr_device(operation="health")` -> RTL-SDR + GNU Radio sidecar health
+    `sdr_device(operation="set_frequency", frequency_mhz=101.5)` -> retune
+    """
     if operation == "list":
         return await list_devices()
     if operation == "initialize":

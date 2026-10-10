@@ -106,7 +106,7 @@ def run_server(
     """
     Unified server runner.
 
-    Args:
+    Parameters (keyword arguments, all optional - prefer Annotated+Field on tools):
         mcp_app: FastMCP application instance.
         args: Parsed CLI arguments (optional, overrides transport/host/port).
         server_name: Server name for logging.
