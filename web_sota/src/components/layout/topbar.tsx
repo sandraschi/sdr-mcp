@@ -69,7 +69,11 @@ export function Topbar({ onToggle, collapsed }: TopbarProps) {
           type="button"
           onClick={toggle}
           className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-800 bg-slate-900/50 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-          title={light ? "Switch to dark (experimental light mode)" : "Switch to light (experimental, ugly)"}
+          title={
+            light
+              ? "Switch to dark (experimental light mode)"
+              : "Switch to light (experimental, ugly)"
+          }
           aria-label="Toggle light mode (experimental)"
         >
           {light ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}

@@ -321,7 +321,7 @@ export function Stations() {
         action: "query",
         list: "search",
         srsearch: signalQuery,
-        srlimit: 1,
+        srlimit: "1",
         format: "json",
         origin: "*",
       });

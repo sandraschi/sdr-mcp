@@ -16,7 +16,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off",
         "noArrayIndexKey": "warn"

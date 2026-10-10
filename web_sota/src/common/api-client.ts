@@ -1,4 +1,9 @@
-const DEFAULT_API_BASE = "http://127.0.0.1:10892";
+// Registry backend: sdr-mcp 11119 (mcp-central-docs/operations/WEBAPP_PORTS.md).
+// Same-origin ("") when served from the :11118 vite host; absolute fallback otherwise.
+// NOTE: /api/status + /api/chat live in the legacy web_api.py bridge (SDR_WEB_API_PORT,
+// started by `sdr-mcp serve --http`, NOT by start.ps1). Tracked: port them to the :11119
+// FastAPI backend so the dashboard works under the standard launcher.
+const DEFAULT_API_BASE = "http://127.0.0.1:11119";
 
 export function getApiBase(): string {
   const stored = localStorage.getItem("sdr-api-base");

@@ -39,7 +39,7 @@ function createPcmPlayer(sampleRate: number) {
 
   return {
     context: ctx,
-    play(samples: Float32Array) {
+    play(samples: Float32Array<ArrayBuffer>) {
       if (ctx.state === "suspended") {
         void ctx.resume();
       }

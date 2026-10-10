@@ -9,13 +9,13 @@ import { Apps } from "@/pages/apps";
 import { Chat } from "@/pages/chat";
 import { Dashboard } from "@/pages/dashboard";
 import { Help } from "@/pages/help";
+import Logging from "@/pages/Logging";
 import { Settings } from "@/pages/settings";
 import { Spectrum } from "@/pages/spectrum";
 import { Stations } from "@/pages/stations";
 import { Status } from "@/pages/status";
 import { Tools } from "@/pages/tools";
 import { Waterfall } from "@/pages/waterfall";
-import Logging from "@/pages/Logging";
 
 function App() {
   return (
