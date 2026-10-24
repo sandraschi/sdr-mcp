@@ -1,43 +1,43 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": false,
-    "includes": ["**", "!dist", "!node_modules", "!eslint.config.js"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space"
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noUnknownAtRules": "off",
-        "noArrayIndexKey": "warn"
-      },
-      "a11y": {
-        "useButtonType": "warn",
-        "noLabelWithoutControl": "warn"
-      },
-      "style": {
-        "noNonNullAssertion": "warn"
-      }
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"includes": ["**", "!dist", "!node_modules", "!eslint.config.js"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "space"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noUnknownAtRules": "off",
+				"noArrayIndexKey": "warn"
+			},
+			"a11y": {
+				"useButtonType": "warn",
+				"noLabelWithoutControl": "warn"
+			},
+			"style": {
+				"noNonNullAssertion": "warn"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	}
 }
