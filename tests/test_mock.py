@@ -103,3 +103,30 @@ class TestMockSpectrumPipeline:
             assert should_use_mock() is True
         with patch("sdr_mcp.handlers.state.SDRCapture.is_available", return_value=True):
             assert should_use_mock() is False
+
+
+class TestScanFrequencies:
+    @pytest.mark.asyncio
+    async def test_scan_measures_every_channel_and_finds_tones(self):
+        from sdr_mcp.handlers.device import scan_frequencies
+        from sdr_mcp.handlers.state import get_sdr_capture
+
+        set_mock_mode(True)
+        try:
+            await get_sdr_capture().close()  # scan must (re)initialize the device itself
+            result = await scan_frequencies(87.5, 108.0, 0.1)
+            assert result["status"] == "scan_complete"
+            assert result["scan_parameters"]["total_steps"] == 206
+            assert result["signal_analysis"]["strong_signals"] > 0
+            for sig in result["signal_analysis"]["detected_signals"]:
+                assert 87.5 <= sig["frequency"] <= 108.0
+                assert sig["snr_db"] >= 10.0
+        finally:
+            set_mock_mode(None)
+
+    @pytest.mark.asyncio
+    async def test_scan_rejects_too_many_channels(self):
+        from sdr_mcp.handlers.device import scan_frequencies
+
+        result = await scan_frequencies(24.0, 1700.0, 0.1)
+        assert result["status"] == "invalid_range"

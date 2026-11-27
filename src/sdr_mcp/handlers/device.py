@@ -6,6 +6,8 @@ import asyncio
 import logging
 from typing import Any
 
+import numpy as np
+
 from ..capture import SDRCapture
 from ..frequency_db import Band, get_frequency_database
 from .state import (
@@ -14,12 +16,70 @@ from .state import (
     _sdr_semaphore,
     get_mock_mode_label,
     get_sdr_capture,
-    get_sdr_processor,
     set_mock_mode,
     should_use_mock,
 )
 
 logger = logging.getLogger(__name__)
+
+
+# Frequency scan tuning
+MAX_SCAN_POINTS = 2000
+SCAN_FFT_SIZE = 4096
+SCAN_AVERAGES = 64
+SCAN_USABLE_FRACTION = 0.75  # edge of the RTL2832 passband rolls off
+SCAN_DC_GUARD_HZ = 10e3  # ignore the LO leakage spike at the hop centre
+SCAN_MAX_CHANNEL_HALF_WIDTH_HZ = 60e3
+PEAK_NEIGHBOURS = 2
+MODERATE_SNR_DB = 10.0
+STRONG_SNR_DB = 20.0
+MAX_REPORTED_SIGNALS = 50
+
+
+async def _sweep_channel_powers(capture: Any, grid_hz: np.ndarray, step_hz: float) -> np.ndarray:
+    """Measure average power (dB) around each grid frequency.
+
+    The tuner hops across the range in chunks of the usable bandwidth; each hop is
+    averaged over SCAN_AVERAGES FFT frames and every grid point inside it gets the
+    mean power of the bins within its channel width. Points that land on the hop
+    centre are skipped and picked up by an extra off-centre hop.
+    """
+    fs = float(capture.sample_rate)
+    usable = fs * SCAN_USABLE_FRACTION
+    half_width = max(min(step_hz / 2, SCAN_MAX_CHANNEL_HALF_WIDTH_HZ), 2 * fs / SCAN_FFT_SIZE)
+    window = np.hanning(SCAN_FFT_SIZE)
+    bin_freqs = np.fft.fftshift(np.fft.fftfreq(SCAN_FFT_SIZE, 1 / fs))
+    powers = np.full(len(grid_hz), np.nan)
+
+    async def hop(center: float) -> None:
+        pending = np.isnan(powers) & (np.abs(grid_hz - center) <= usable / 2 - half_width)
+        pending &= np.abs(grid_hz - center) > SCAN_DC_GUARD_HZ + half_width
+        if not pending.any():
+            return
+        await capture.set_frequency(center)
+        await capture.read_samples(16384)  # flush samples from before the retune
+        samples = await capture.read_samples(SCAN_FFT_SIZE * SCAN_AVERAGES)
+        if samples is None or len(samples) < SCAN_FFT_SIZE * SCAN_AVERAGES:
+            return
+        frames = samples[: SCAN_FFT_SIZE * SCAN_AVERAGES].reshape(SCAN_AVERAGES, SCAN_FFT_SIZE)
+        frames = frames - frames.mean()
+        spectrum = np.fft.fftshift(np.fft.fft(frames * window, axis=1), axes=1)
+        psd = np.mean(np.abs(spectrum) ** 2, axis=0)
+        offsets = bin_freqs + center
+        for i in np.flatnonzero(pending):
+            mask = np.abs(offsets - grid_hz[i]) <= half_width
+            powers[i] = 10 * np.log10(psd[mask].mean() + 1e-20)
+
+    stride = usable - 2 * half_width
+    centers = np.arange(grid_hz[0] + usable / 2 - half_width, grid_hz[-1] + stride, stride)
+    for center in centers:
+        await hop(float(center))
+        await asyncio.sleep(0)
+    # Grid points that sat on a hop centre (DC guard): re-measure them off-centre.
+    for i in np.flatnonzero(np.isnan(powers)):
+        if np.isnan(powers[i]):
+            await hop(float(grid_hz[i]) + usable / 4)
+    return powers
 
 
 async def list_devices() -> dict[str, Any]:
@@ -426,60 +486,59 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                 "conversation": {"message": f"Step size must be positive (got {step_size})"},
             }
 
-        max_steps = 100
-        step_count = int((end_freq - start_freq) / step_size) + 1
-        if step_count > max_steps:
+        grid = np.arange(start_freq, end_freq + step_size / 2, step_size)
+        if len(grid) > MAX_SCAN_POINTS:
             return {
                 "status": "invalid_range",
                 "conversation": {
-                    "message": f"Scan would take {step_count} steps (max {max_steps}). Increase step_size or narrow the range."
+                    "message": f"Scan would measure {len(grid)} channels (max {MAX_SCAN_POINTS}). "
+                    "Increase step_size or narrow the range."
                 },
             }
 
         capture = get_sdr_capture()
-        processor = get_sdr_processor()
 
-        results = []
+        if getattr(capture, "sdr", None) is None and not await capture.initialize():
+            return {
+                "status": "scan_error",
+                "conversation": {"message": "SDR device could not be initialized - check hardware and drivers."},
+                "error": "initialize_failed",
+            }
+
         scan_start_time = asyncio.get_running_loop().time()
-        current_freq = start_freq
-        conversation_progress = []
-        detected_signals = []
-
         async with _sdr_semaphore:
-            while current_freq <= end_freq:
-                await capture.set_frequency(current_freq * 1e6)
-                await asyncio.sleep(0.1)
-
-                samples = await capture.read_samples(512 * 1024)
-                if samples is not None:
-                    spectrum_data = processor.process_samples(samples)
-                    spectrum = spectrum_data.get("spectrum", [])
-                    max_power = max(spectrum) if spectrum else -100
-
-                    result = {
-                        "frequency_mhz": current_freq,
-                        "max_power_db": round(max_power, 1),
-                        "spectrum_data": spectrum_data,
-                        "timestamp": asyncio.get_running_loop().time(),
-                    }
-                    results.append(result)
-
-                    if spectrum:
-                        avg_power = sum(spectrum) / len(spectrum)
-                        if max_power > avg_power + 15:
-                            detected_signals.append(
-                                {"frequency": current_freq, "power": max_power, "strength": "strong"}
-                            )
-                            conversation_progress.append(f"Strong signal detected at {current_freq:.1f} MHz")
-                        elif max_power > avg_power + 5:
-                            detected_signals.append(
-                                {"frequency": current_freq, "power": max_power, "strength": "moderate"}
-                            )
-
-                current_freq += step_size
-                await asyncio.sleep(0)
-
+            powers = await _sweep_channel_powers(capture, grid * 1e6, step_size * 1e6)
         scan_duration = asyncio.get_running_loop().time() - scan_start_time
+
+        valid = ~np.isnan(powers)
+        noise_floor = float(np.median(powers[valid])) if valid.any() else 0.0
+        results = [
+            {"frequency_mhz": round(float(f), 4), "power_db": round(float(pw), 1)}
+            for f, pw in zip(grid, powers, strict=True)
+            if not np.isnan(pw)
+        ]
+
+        detected_signals = []
+        for i, pw in enumerate(powers):
+            if np.isnan(pw):
+                continue
+            snr = pw - noise_floor
+            lo, hi = max(0, i - PEAK_NEIGHBOURS), min(len(powers), i + PEAK_NEIGHBOURS + 1)
+            if snr < MODERATE_SNR_DB or pw < np.nanmax(powers[lo:hi]):
+                continue
+            detected_signals.append(
+                {
+                    "frequency": round(float(grid[i]), 4),
+                    "power": round(float(pw), 1),
+                    "snr_db": round(float(snr), 1),
+                    "strength": "strong" if snr >= STRONG_SNR_DB else "moderate",
+                }
+            )
+        conversation_progress = [
+            f"Strong signal detected at {s['frequency']:.3f} MHz (+{s['snr_db']:.0f} dB)"
+            for s in sorted(detected_signals, key=lambda s: -s["snr_db"])
+            if s["strength"] == "strong"
+        ]
 
         total_signals = len(detected_signals)
         strong_signals = len([s for s in detected_signals if s["strength"] == "strong"])
@@ -526,19 +585,20 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                 "total_signals_detected": total_signals,
                 "strong_signals": strong_signals,
                 "moderate_signals": total_signals - strong_signals,
-                "detected_signals": detected_signals[:10],
+                "noise_floor_db": round(noise_floor, 1),
+                "detected_signals": detected_signals[:MAX_REPORTED_SIGNALS],
             },
             "conversation": {
                 "message": scan_assessment,
                 "expertise_level": expertise_level,
                 "scan_summary": f"Completed frequency sweep from {start_freq:.1f} to {end_freq:.1f} MHz in {scan_duration:.1f} seconds.",
-                "key_findings": conversation_progress[-5:]
-                if conversation_progress
-                else ["Scan completed successfully"],
+                "key_findings": conversation_progress[:5] if conversation_progress else ["Scan completed successfully"],
                 "band_context": band_analysis,
                 "next_recommendations": [
                     "Focus on strongest signals: "
-                    + ", ".join([f"{s['frequency']:.1f} MHz" for s in detected_signals[:3]])
+                    + ", ".join(
+                        f"{s['frequency']:.1f} MHz" for s in sorted(detected_signals, key=lambda s: -s["snr_db"])[:3]
+                    )
                     if detected_signals
                     else "Try different frequency ranges",
                     "Use sdr_tune_preset() for known stations",
@@ -547,17 +607,18 @@ async def scan_frequencies(start_freq: float, end_freq: float, step_size: float 
                 ],
                 "technical_notes": [
                     f"Average scan time per frequency: {scan_duration / max(len(results), 1):.2f} seconds",
-                    f"Dynamic range covered: {(max([r['max_power_db'] for r in results]) - min([r['max_power_db'] for r in results])):.1f} dB"
+                    f"Dynamic range covered: {(max(r['power_db'] for r in results) - min(r['power_db'] for r in results)):.1f} dB"
                     if results
                     else "Dynamic range covered: 0.0 dB",
-                    "Signal detection threshold: 5-15 dB above average noise",
+                    f"Detection: local channel-power peak >= {MODERATE_SNR_DB:.0f} dB above median noise floor "
+                    f"(strong >= {STRONG_SNR_DB:.0f} dB)",
                 ],
             },
             "sampling": {
-                "scan_method": "FFT-based spectrum analysis",
+                "scan_method": "Wideband hops with averaged FFT, channel power per grid point",
                 "sample_rate": capture.sample_rate,
-                "fft_size": processor.fft_size,
-                "frequency_resolution": capture.sample_rate / processor.fft_size,
+                "fft_size": SCAN_FFT_SIZE,
+                "frequency_resolution": capture.sample_rate / SCAN_FFT_SIZE,
                 "processing_efficiency": f"{len(results) / max(scan_duration, 0.01):.1f} frequencies/second",
             },
         }

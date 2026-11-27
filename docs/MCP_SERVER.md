@@ -15,7 +15,8 @@ Five portmanteau tools replace the original 17 individual tools. Each uses an `o
 | `set_frequency` | `frequency_mhz` | Tune (24–1766 MHz) |
 | `set_gain` | `gain` | Auto or 0–49.6 dB |
 | `tune_preset` | `preset_name` | Longwave presets |
-| `scan` | `start_freq`, `end_freq`, `step_size` | Frequency scan |
+| `scan` | `start_freq`, `end_freq`, `step_size` (MHz) | Channel-power sweep, peaks >= 10 dB above the median floor (max 2000 channels; FM band at 0.1 MHz takes ~5 s) |
+| `rds` | `frequency_mhz`, `duration_s` (2-60, default 10) | Decode RDS of an FM station: PI, PS name (+ `ps_dynamic`), PTY, RadioText |
 | `mock_mode` | `mock_enabled` (bool, omit=query) | Synthetic IQ when no dongle |
 
 ## `sdr_spectrum`

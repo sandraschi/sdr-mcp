@@ -50,6 +50,9 @@ class MockSDRCapture:
     async def read_samples(self, num_samples: int = 1024 * 1024) -> np.ndarray:
         return self._generator.generate(num_samples)
 
+    async def read_samples_contiguous(self, num_samples: int, chunk_samples: int = 1 << 18) -> np.ndarray:
+        return self._generator.generate(num_samples // 256 * 256)
+
     async def close(self) -> None:
         self.is_running = False
         self.sdr = None

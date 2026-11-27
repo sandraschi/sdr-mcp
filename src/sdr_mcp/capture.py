@@ -86,6 +86,32 @@ class SDRCapture:
                 logger.error(f"Failed to read samples: {e}", exc_info=True)
         return None
 
+    async def read_samples_contiguous(self, num_samples: int, chunk_samples: int = 1 << 18) -> np.ndarray | None:
+        """Read a gap-free block of IQ samples (rounded down to a multiple of 256).
+
+        `read_samples` converts every chunk to complex128 before asking for the next one;
+        at 2+ Msps that is slow enough for librtlsdr to drop USB data between calls, which
+        breaks anything phase-coherent (RDS, digital modes). Here the raw bytes are read
+        back to back and converted once at the end.
+        """
+        if self.sdr:
+            try:
+                return await asyncio.to_thread(self._read_contiguous_sync, num_samples, chunk_samples)
+            except Exception as e:
+                logger.error(f"Failed to read samples: {e}", exc_info=True)
+        return None
+
+    def _read_contiguous_sync(self, num_samples: int, chunk_samples: int) -> np.ndarray:
+        remaining = num_samples // 256 * 2 * 256  # bytes; libusb wants 512-byte multiples
+        chunk_bytes = max(chunk_samples // 256, 1) * 2 * 256
+        parts = []
+        while remaining > 0:
+            size = min(remaining, chunk_bytes)
+            parts.append(bytes(self.sdr.read_bytes(size)))  # copy: librtlsdr reuses the buffer
+            remaining -= size
+        raw = np.frombuffer(b"".join(parts), dtype=np.uint8).astype(np.float32)
+        return ((raw[0::2] - 127.5) + 1j * (raw[1::2] - 127.5)) / 127.5
+
     async def close(self):
         """Close the SDR device."""
         if self.sdr:
@@ -113,8 +139,8 @@ class SDRCapture:
         try:
             from rtlsdr import RtlSdr
 
-            devices = RtlSdr.get_device_index_by_serial()
-            return [{"index": idx, "serial": serial} for idx, serial in devices.items()]
+            serials = RtlSdr.get_device_serial_addresses()
+            return [{"index": idx, "serial": serial} for idx, serial in enumerate(serials)]
         except Exception:
             return []
 
@@ -124,7 +150,6 @@ class SDRCapture:
         try:
             from rtlsdr import RtlSdr
 
-            devices = RtlSdr.get_device_index_by_serial()
-            return len(devices) > 0
+            return len(RtlSdr.get_device_serial_addresses()) > 0
         except Exception:
             return False
