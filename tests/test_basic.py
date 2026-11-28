@@ -13,8 +13,11 @@ from sdr_mcp.processor import SDRProcessor
 
 # ── Capture Tests ─────────────────────────────────────────────────────────
 
+requires_no_hardware = pytest.mark.skipif(SDRCapture.is_available(), reason="an RTL-SDR dongle is plugged in")
+
 
 class TestSDRCapture:
+    @requires_no_hardware
     def test_device_detection_no_hardware(self):
         """RtlSdr is imported lazily, so we test by patching the method body."""
         capture = SDRCapture()
@@ -37,6 +40,7 @@ class TestSDRCapture:
         assert info["device_index"] == 0
         assert info["available"] is False
 
+    @requires_no_hardware
     @pytest.mark.asyncio
     async def test_initialize_no_rtlsdr(self):
         """The initialize method catches ImportError from pyrtlsdr."""
