@@ -12,6 +12,7 @@ from .device import (
 )
 from .gnuradio_ops import handle_gnuradio_operation
 from .online import query_online_database
+from .rds import decode_station_rds
 from .spectrum import (
     get_audio_status,
     get_spectrum,
@@ -30,6 +31,7 @@ from .stations import (
 
 __all__ = [
     "configure_mock_mode",
+    "decode_station_rds",
     "get_audio_status",
     "get_frequency_database_stats",
     "get_program_schedule",

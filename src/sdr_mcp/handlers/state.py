@@ -67,7 +67,23 @@ def should_use_mock() -> bool:
         return True
     if _mock_mode is False:
         return False
+    if _sdr_capture is not None:
+        # Auto mode with a capture already chosen: report what is actually in use.
+        # Re-probing would miss a dongle this process has open and report mock.
+        from ..mock_capture import MockSDRCapture
+
+        return isinstance(_sdr_capture, MockSDRCapture)
     return not SDRCapture.is_available()
+
+
+def get_open_hardware_capture() -> SDRCapture | None:
+    """The cached hardware capture if it has a dongle open, else None."""
+    from ..mock_capture import MockSDRCapture
+
+    capture = _sdr_capture
+    if capture is None or isinstance(capture, MockSDRCapture) or getattr(capture, "sdr", None) is None:
+        return None
+    return capture
 
 
 def reset_sdr_capture() -> None:

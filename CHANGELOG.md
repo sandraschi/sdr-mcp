@@ -1,3 +1,16 @@
+## [Unreleased] — 2026-11-27
+
+### Added
+- `sdr_device(operation="rds")`: RDS decoder (PI, PS, PTY, RadioText) in pure numpy/scipy (`sdr_mcp/rds.py`),
+  tested end-to-end on a synthetic FM+RDS signal
+- `SDRCapture.read_samples_contiguous()`: gap-free capture (raw bytes read back to back, converted once)
+
+### Fixed
+- Hardware never detected: `is_available()`/`list_devices()` called `get_device_index_by_serial()` without its argument
+- `scan` returned 0 steps (device never initialized) and attributed the strongest bin of each 2 MHz
+  capture to the centre frequency; now hops across the range and measures channel power per grid point
+- `pyrtlsdr` pinned `<0.4` (0.4+ needs the librtlsdr fork) with `setuptools<81` (0.3 imports `pkg_resources`)
+
 
 ## [Unreleased] — 2026-10-10 (assfix)
 
