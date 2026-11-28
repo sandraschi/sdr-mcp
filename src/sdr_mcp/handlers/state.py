@@ -76,6 +76,16 @@ def should_use_mock() -> bool:
     return not SDRCapture.is_available()
 
 
+def get_open_hardware_capture() -> SDRCapture | None:
+    """The cached hardware capture if it has a dongle open, else None."""
+    from ..mock_capture import MockSDRCapture
+
+    capture = _sdr_capture
+    if capture is None or isinstance(capture, MockSDRCapture) or getattr(capture, "sdr", None) is None:
+        return None
+    return capture
+
+
 def reset_sdr_capture() -> None:
     """Drop cached capture so the next get picks up mock/hardware changes."""
     global _sdr_capture

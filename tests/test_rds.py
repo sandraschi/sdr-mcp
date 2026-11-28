@@ -110,3 +110,26 @@ def test_auto_mock_mode_follows_active_capture(monkeypatch):
 
     monkeypatch.setattr(state, "_sdr_capture", None)
     assert state.should_use_mock() is True
+
+
+@pytest.mark.asyncio
+async def test_list_devices_includes_open_dongle(monkeypatch):
+    """A dongle this process has open drops out of enumeration; list must still report it."""
+    from sdr_mcp.capture import SDRCapture
+    from sdr_mcp.handlers import device, state
+
+    capture = SDRCapture()
+    capture.sdr = object()
+    capture.serial = "85255996"
+    monkeypatch.setattr(state, "_mock_mode", None)
+    monkeypatch.setattr(state, "_sdr_capture", capture)
+    monkeypatch.setattr(SDRCapture, "is_available", staticmethod(lambda: False))
+    monkeypatch.setattr(SDRCapture, "list_devices", staticmethod(lambda: []))
+
+    result = await device.list_devices()
+    assert result["available"] is True
+    assert result["devices"] == [{"index": 0, "serial": "85255996", "in_use": True}]
+
+    monkeypatch.setattr(SDRCapture, "list_devices", staticmethod(lambda: [{"index": 0, "serial": "85255996"}]))
+    result = await device.list_devices()
+    assert result["devices"] == [{"index": 0, "serial": "85255996", "in_use": True}]

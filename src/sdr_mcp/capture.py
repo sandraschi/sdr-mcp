@@ -17,6 +17,7 @@ class SDRCapture:
 
     def __init__(self, device_index: int = 0):
         self.device_index = device_index
+        self.serial: str | None = None
         self.sdr = None
         self.is_running = False
         self.sample_rate = 2.048e6  # 2.048 MHz
@@ -29,7 +30,10 @@ class SDRCapture:
         try:
             from rtlsdr import RtlSdr
 
-            self.sdr = RtlSdr()
+            # Read the serial before opening: once open, enumeration no longer lists this dongle.
+            serials = RtlSdr.get_device_serial_addresses()
+            self.serial = serials[self.device_index] if self.device_index < len(serials) else None
+            self.sdr = RtlSdr(self.device_index)
 
             # Configure device
             self.sdr.sample_rate = self.sample_rate

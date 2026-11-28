@@ -15,6 +15,7 @@ from .state import (
     MIN_FREQ_MHZ,
     _sdr_semaphore,
     get_mock_mode_label,
+    get_open_hardware_capture,
     get_sdr_capture,
     set_mock_mode,
     should_use_mock,
@@ -86,7 +87,16 @@ async def list_devices() -> dict[str, Any]:
     """List all available RTL-SDR devices with conversational guidance."""
     try:
         devices = SDRCapture.list_devices()
-        available = SDRCapture.is_available()
+        # A dongle this process has open is missing from enumeration: add it back.
+        open_capture = get_open_hardware_capture()
+        if open_capture is not None:
+            serial = open_capture.serial
+            match = next((d for d in devices if serial and d["serial"] == serial), None)
+            if match is not None:
+                match["in_use"] = True
+            else:
+                devices.insert(0, {"index": open_capture.device_index, "serial": serial, "in_use": True})
+        available = bool(devices)
 
         if should_use_mock():
             return {
