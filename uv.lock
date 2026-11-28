@@ -1154,9 +1154,29 @@ wheels = [
 name = "pyrtlsdr"
 version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'linux'",
+]
 sdist = { url = "https://files.pythonhosted.org/packages/13/82/d74c78b7b68d2b741f3973fbc0a56c3c676d5fac055b76e61083e3fd19ba/pyrtlsdr-0.3.0.tar.gz", hash = "sha256:fb3e583ba073b861e8e0bc5e62f66f07365e9147f5d36491de4ad62f23e45362", size = 29209, upload-time = "2023-08-02T19:25:11.683Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/a6/618ffd03652253ddd6455a9334e56332b9d5f6afa55197710a533dd91c28/pyrtlsdr-0.3.0-py2.py3-none-any.whl", hash = "sha256:4967df42eb89e6bd70602337ae355c9b1231eb1d517fd8cc30f7b862fd1392f6", size = 26064, upload-time = "2023-08-02T19:25:09.952Z" },
+]
+
+[package.optional-dependencies]
+lib = [
+    { name = "pyrtlsdrlib" },
+]
+
+[[package]]
+name = "pyrtlsdr"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform != 'linux'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/76/e9/c261c28797a71b5c623dcfae46e78c34413f18d95399aa4c6a5243ff4d5a/pyrtlsdr-0.5.1.tar.gz", hash = "sha256:f5f5c1d7d9e5f98095c03f1431f2f39be45f54cc1e1702cc0891abe07b32e4bb", size = 37944, upload-time = "2026-10-16T22:34:09.747Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/01/35073006a3bd840878f4494fc7eb4e50a813a1c7f0b67f56ba9304e7a60d/pyrtlsdr-0.5.1-py3-none-any.whl", hash = "sha256:bfb7fc26aaa21a1f0dd5c4fac4945281ccd56a45e8b5cca85bdc873d74328a4f", size = 31654, upload-time = "2026-10-16T22:34:08.565Z" },
 ]
 
 [package.optional-dependencies]
@@ -1537,7 +1557,8 @@ dependencies = [
     { name = "numpy" },
     { name = "prefab-ui" },
     { name = "pydantic" },
-    { name = "pyrtlsdr", extra = ["lib"] },
+    { name = "pyrtlsdr", version = "0.3.0", source = { registry = "https://pypi.org/simple" }, extra = ["lib"], marker = "sys_platform == 'linux'" },
+    { name = "pyrtlsdr", version = "0.5.1", source = { registry = "https://pypi.org/simple" }, extra = ["lib"], marker = "sys_platform != 'linux'" },
     { name = "rich" },
     { name = "scipy" },
     { name = "setuptools", marker = "sys_platform == 'linux'" },
@@ -1566,7 +1587,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.21.0,<3.0.0" },
     { name = "prefab-ui", specifier = ">=0.14.0" },
     { name = "pydantic", specifier = ">=2.0.0,<3.0.0" },
-    { name = "pyrtlsdr", extras = ["lib"], marker = "sys_platform != 'linux'", specifier = ">=0.3.0,<1.0.0" },
+    { name = "pyrtlsdr", extras = ["lib"], marker = "sys_platform != 'linux'", specifier = ">=0.4.0,<1.0.0" },
     { name = "pyrtlsdr", extras = ["lib"], marker = "sys_platform == 'linux'", specifier = ">=0.3.0,<0.4.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0,<8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.20.0,<1.0.0" },
