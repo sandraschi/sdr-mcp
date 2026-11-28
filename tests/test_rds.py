@@ -91,3 +91,22 @@ async def test_rds_operation_validates_frequency():
 
     assert (await sdr_device(operation="rds"))["success"] is False
     assert (await sdr_device(operation="rds", frequency_mhz=433.92))["success"] is False
+
+
+def test_auto_mock_mode_follows_active_capture(monkeypatch):
+    """Once a hardware capture is open, a re-probe that no longer sees the dongle must not report mock."""
+    from sdr_mcp.capture import SDRCapture
+    from sdr_mcp.handlers import state
+    from sdr_mcp.mock_capture import MockSDRCapture
+
+    monkeypatch.setattr(state, "_mock_mode", None)
+    monkeypatch.setattr(SDRCapture, "is_available", staticmethod(lambda: False))
+
+    monkeypatch.setattr(state, "_sdr_capture", SDRCapture())
+    assert state.should_use_mock() is False
+
+    monkeypatch.setattr(state, "_sdr_capture", MockSDRCapture())
+    assert state.should_use_mock() is True
+
+    monkeypatch.setattr(state, "_sdr_capture", None)
+    assert state.should_use_mock() is True
